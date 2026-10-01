@@ -161,6 +161,8 @@ export class WorkerPool {
         workerEntry.isBusy = true;
         workerEntry.currentTask = queueItem;
 
+        queueItem.dispatchedAt = performance.now();
+
         const messageHandler = (msg) => {
           if (msg.type === 'PROGRESS') {
             if (queueItem.onProgress) {
@@ -173,9 +175,21 @@ export class WorkerPool {
               });
             }
           } else if (msg.type === 'COMPLETE') {
+            const completedAt = performance.now();
             workerEntry.worker.removeListener('message', messageHandler);
             workerEntry.isBusy = false;
             workerEntry.currentTask = null;
+            
+            const chunkTiming = {
+              chunkId: msg.chunkId,
+              workerId: workerEntry.id,
+              startTime: Number(queueItem.dispatchedAt.toFixed(2)),
+              endTime: Number(completedAt.toFixed(2)),
+              durationMs: Number((completedAt - queueItem.dispatchedAt).toFixed(2)),
+              recordCount: msg.count || (queueItem.task?.records?.length || 0),
+            };
+            msg.chunkTiming = chunkTiming;
+
             queueItem.onComplete(msg);
             this.dispatch(); // Pick up next task in queue
           } else if (msg.type === 'ERROR') {

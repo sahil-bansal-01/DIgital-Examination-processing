@@ -89,6 +89,7 @@ export const triggerExamProcessing = async (req, res) => {
       chunkSize: resultPayload.chunkSize,
       chunkingStrategy: resultPayload.chunkingStrategy || 'none',
       stageTimings: resultPayload.stageTimings,
+      chunks: resultPayload.chunks || [],
       totalTimeMs: resultPayload.totalTimeMs,
       speedup: resultPayload.speedup,
       efficiency: resultPayload.efficiency,

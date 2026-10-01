@@ -1,4 +1,14 @@
-const BASE_URL = '/api';
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    const cleanUrl = envUrl.replace(/\/+$/, '');
+    return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+  }
+  // In dev mode, default directly to backend on port 5000 to eliminate proxy miss 404s
+  return import.meta.env.DEV ? 'http://localhost:5000/api' : '/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('eps_token');

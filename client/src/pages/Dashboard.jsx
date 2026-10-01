@@ -13,6 +13,11 @@ import {
   Clock,
   ShieldCheck,
   Award,
+  Crosshair,
+  Activity,
+  Radio,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -30,7 +35,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Legend,
 } from 'recharts';
 
 export const Dashboard = () => {
@@ -68,26 +72,31 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 shadow-xl">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* 1. Futuristic Command Center Welcome Banner */}
+      <div className="relative overflow-hidden rounded-xl p-5 sm:p-7 bg-[#0F172A]/70 border border-cyan-500/30 backdrop-blur-2xl shadow-[0_0_35px_rgba(0,0,0,0.8)] tech-corners">
+        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+          <Crosshair className="w-36 h-36 text-cyan-400" />
+        </div>
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 font-mono">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant={isAdmin ? 'rose' : isTeacher ? 'indigo' : 'emerald'}>
-                {user?.role?.toUpperCase()} WORKSPACE
-              </Badge>
-              <span className="text-xs font-mono text-slate-400">
-                Semester 3 | Academic Year 2025-26
+              <span className="px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-[10px] text-cyan-300 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                {user?.role?.toUpperCase()} // TERMINAL ACTIVE
+              </span>
+              <span className="text-[11px] text-slate-500">
+                SYS.CYCLE: SEMESTER 3 / 2025-26
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Welcome, {user?.name}
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
+              COMMAND CONSOLE: <span className="text-cyan-400">{user?.name}</span>
             </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-xl">
-              {isAdmin && 'Exam Cell Command Center: Monitor multi-core result runs, academic schemas, and student records.'}
-              {isTeacher && 'Faculty Grading Portal: Manage marks entry, view assigned cohorts, and submit validations.'}
-              {isStudent && 'Student Academic Hub: View published semester transcripts, SGPA milestones, and grade cards.'}
+            <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl font-sans">
+              {isAdmin && 'High-performance examination processing core. Monitor multi-threaded worker pools, schemas, and live audit telemetry.'}
+              {isTeacher && 'Faculty evaluation node. Enter marks with zero-leak client validation, view cohorts, and dispatch grade records.'}
+              {isStudent && 'Student academic node. View verified semester transcripts, grade cutoffs, and official marks verification.'}
             </p>
           </div>
 
@@ -95,21 +104,21 @@ export const Dashboard = () => {
             {isAdmin && (
               <Link to="/performance-lab">
                 <Button variant="gradient" icon={Cpu}>
-                  CAPP Performance Lab
+                  CAPP PERFORMANCE LAB
                 </Button>
               </Link>
             )}
             {isTeacher && (
               <Link to="/marks">
                 <Button variant="primary" icon={FileCheck}>
-                  Enter Student Marks
+                  ENTER MARKS TELEMETRY
                 </Button>
               </Link>
             )}
             {isStudent && (
               <Link to="/my-results">
                 <Button variant="primary" icon={Award}>
-                  View Official Marksheet
+                  OFFICIAL TRANSCRIPT
                 </Button>
               </Link>
             )}
@@ -117,57 +126,58 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* ADMIN DASHBOARD VIEW */}
+      {/* 2. ADMIN DASHBOARD VIEW */}
       {isAdmin && data?.stats && (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Key Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Enrolled Students"
+              title="Enrolled Candidates"
               value={data.stats.totalStudents}
-              subtext="Undergraduate Candidates"
+              subtext="Active Academic Records"
               icon={Users}
               color="cyan"
-              trend={{ text: '100% active', isPositive: true }}
+              trend={{ text: '100% Verified', isPositive: true }}
             />
             <StatCard
-              title="Faculty Members"
+              title="Faculty Evaluators"
               value={data.stats.totalTeachers}
-              subtext="Evaluators & Instructors"
+              subtext="Instructors Assigned"
               icon={GraduationCap}
-              color="indigo"
+              color="purple"
             />
             <StatCard
-              title="Active Examinations"
+              title="Active Protocols"
               value={data.stats.activeExams}
-              subtext={`Out of ${data.stats.totalExams} total exams`}
+              subtext={`Out of ${data.stats.totalExams} Total Protocols`}
               icon={CalendarCheck}
               color="amber"
             />
             <StatCard
-              title="Processing Engine Runs"
+              title="Parallel Engine Runs"
               value={data.stats.processingRunsCount}
-              subtext="Sequential & Parallel tests"
+              subtext="CAPP Worker_threads"
               icon={Cpu}
               color="emerald"
-              trend={{ text: 'CAPP Enabled', isPositive: true }}
+              trend={{ text: 'Multi-Core Active', isPositive: true }}
             />
           </div>
 
           {/* Charts & Recent Activity Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Pass Percentage Trend Chart */}
-            <div className="lg:col-span-8 p-6 rounded-2xl obsidian-card">
-              <div className="flex items-center justify-between mb-6">
+            <div className="lg:col-span-8 p-5 sm:p-6 rounded-xl bg-[#0F172A]/60 border border-cyan-500/25 backdrop-blur-xl tech-corners">
+              <div className="flex items-center justify-between mb-5 font-mono">
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
-                    Examination Pass Percentage Trends
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <span>COHORT PASS RATE TELEMETRY</span>
                   </h3>
-                  <p className="text-xs text-slate-400">
-                    Cohort progression across published university examinations
+                  <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                    Historical progression across published examination runs
                   </p>
                 </div>
-                <Badge variant="cyan">Semester 3 Cohorts</Badge>
+                <Badge variant="cyan">SEMESTER 3 COHORT</Badge>
               </div>
 
               <div className="h-64 w-full">
@@ -176,59 +186,65 @@ export const Dashboard = () => {
                     <AreaChart data={data.passRateTrends}>
                       <defs>
                         <linearGradient id="passGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
+                          <stop offset="5%" stopColor="#00F2FE" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#00F2FE" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-                      <XAxis dataKey="examTitle" stroke="#94a3b8" fontSize={11} />
-                      <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} unit="%" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,242,254,0.1)" />
+                      <XAxis dataKey="examTitle" stroke="#64748b" fontSize={10} fontFamily="JetBrains Mono" />
+                      <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} unit="%" fontFamily="JetBrains Mono" />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                        contentStyle={{ 
+                          backgroundColor: '#080C14', 
+                          borderColor: 'rgba(0,242,254,0.3)', 
+                          borderRadius: '8px',
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: '11px'
+                        }}
                       />
                       <Area
                         type="monotone"
                         dataKey="passPercentage"
-                        stroke="#06b6d4"
-                        strokeWidth={2.5}
+                        stroke="#00F2FE"
+                        strokeWidth={2}
                         fill="url(#passGrad)"
                         name="Pass Rate"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-                    No published exam trends yet. Run result processing to generate insights.
+                  <div className="h-full flex items-center justify-center text-slate-500 font-mono text-xs">
+                    // NO PUBLISHED EXAM TRENDS RECORDED. RUN PARALLEL ENGINE TO POPULATE.
                   </div>
                 )}
               </div>
             </div>
 
             {/* Recent Audit Trail Snippet */}
-            <div className="lg:col-span-4 p-6 rounded-2xl obsidian-card flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            <div className="lg:col-span-4 p-5 sm:p-6 rounded-xl bg-[#0F172A]/60 border border-cyan-500/25 backdrop-blur-xl flex flex-col tech-corners">
+              <div className="flex items-center justify-between mb-4 font-mono">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Audit Trail
+                  <span>AUDIT STREAM</span>
                 </h3>
-                <Link to="/audit-logs" className="text-xs text-cyan-400 hover:underline">
-                  View All
+                <Link to="/audit-logs" className="text-xs text-cyan-400 hover:text-cyan-300">
+                  VIEW ALL //
                 </Link>
               </div>
 
-              <div className="space-y-3 flex-1 overflow-y-auto max-h-72 pr-1">
+              <div className="space-y-2.5 flex-1 overflow-y-auto max-h-72 pr-1 font-mono">
                 {data.recentAuditLogs?.map((log) => (
                   <div
                     key={log._id}
-                    className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-800 text-xs"
+                    className="p-2.5 rounded-lg bg-slate-900/60 border border-cyan-500/15 text-xs hover:border-cyan-500/30 transition"
                   >
                     <div className="flex items-center justify-between text-slate-400 mb-1">
-                      <span className="font-semibold text-slate-200">{log.userName}</span>
-                      <span className="font-mono text-[10px] text-slate-400">
-                        {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <span className="font-semibold text-cyan-300 text-[11px]">{log.userName}</span>
+                      <span className="text-[9px] text-slate-500">
+                        {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </span>
                     </div>
-                    <p className="text-slate-300 font-mono text-[11px] truncate">{log.action}</p>
+                    <p className="text-white font-bold text-[10px] truncate uppercase">{log.action}</p>
                     <p className="text-slate-400 text-[10px] truncate mt-0.5">{log.details}</p>
                   </div>
                 ))}
@@ -238,57 +254,59 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* TEACHER DASHBOARD VIEW */}
+      {/* 3. TEACHER DASHBOARD VIEW */}
       {isTeacher && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
               title="Assigned Subjects"
               value={data?.assignedSubjects?.length || 0}
-              subtext="Theory & Laboratory Modules"
+              subtext="Theory & Lab Modules"
               icon={GraduationCap}
-              color="indigo"
+              color="purple"
             />
             <StatCard
               title="Exams in Marks Entry"
               value={data?.openExamsCount || 0}
-              subtext="Ready for submission"
+              subtext="Ready for Telemetry"
               icon={CalendarCheck}
               color="cyan"
             />
             <StatCard
-              title="Pending Marks Batches"
+              title="Pending Cohort Batches"
               value={data?.pendingSubmissions?.length || 0}
-              subtext="Cohorts to verify"
+              subtext="Awaiting Submission"
               icon={AlertCircle}
               color="amber"
             />
           </div>
 
-          <div className="p-6 rounded-2xl obsidian-card">
-            <h3 className="text-base font-bold text-white mb-4">Assigned Course Offerings & Status</h3>
+          <div className="p-5 sm:p-6 rounded-xl bg-[#0F172A]/60 border border-cyan-500/25 backdrop-blur-xl tech-corners">
+            <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider mb-4">
+              // ASSIGNED COURSE OFFERINGS & STATUS
+            </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-800/60 text-xs text-slate-400 uppercase font-mono">
+              <table className="w-full text-left font-mono text-xs text-slate-300">
+                <thead className="bg-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider border-b border-cyan-500/20">
                   <tr>
-                    <th className="px-4 py-3">Subject Code</th>
-                    <th className="px-4 py-3">Subject Name</th>
-                    <th className="px-4 py-3">Section</th>
-                    <th className="px-4 py-3">Action</th>
+                    <th className="px-4 py-3">COURSE CODE</th>
+                    <th className="px-4 py-3">COURSE TITLE</th>
+                    <th className="px-4 py-3">SECTION</th>
+                    <th className="px-4 py-3">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-800/60">
                   {data?.assignedSubjects?.map((asgn, i) => (
-                    <tr key={i} className="hover:bg-slate-800/30">
-                      <td className="px-4 py-3 font-mono font-bold text-cyan-400">{asgn.subjectCode}</td>
+                    <tr key={i} className="hover:bg-slate-900/40">
+                      <td className="px-4 py-3 font-bold text-cyan-400">{asgn.subjectCode}</td>
                       <td className="px-4 py-3 font-medium text-white">{asgn.subjectName}</td>
                       <td className="px-4 py-3">
-                        <Badge variant="indigo">Section {asgn.section}</Badge>
+                        <Badge variant="purple">SECTION {asgn.section}</Badge>
                       </td>
                       <td className="px-4 py-3">
                         <Link to={`/marks?subjectId=${asgn.subjectId}&section=${asgn.section}`}>
                           <Button size="sm" variant="outline">
-                            Enter Marks
+                            ENTER MARKS
                           </Button>
                         </Link>
                       </td>
@@ -301,19 +319,19 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* STUDENT DASHBOARD VIEW */}
+      {/* 4. STUDENT DASHBOARD VIEW */}
       {isStudent && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard
               title="Cumulative GPA (CGPA)"
               value={data?.cgpa || '0.00'}
-              subtext="Across all completed semesters"
+              subtext="Aggregated Performance"
               icon={Award}
               color="emerald"
             />
             <StatCard
-              title="Latest SGPA"
+              title="Latest SGPA Milestone"
               value={data?.latestResult?.sgpa || '0.00'}
               subtext={data?.latestResult?.exam?.title || 'Current Semester'}
               icon={TrendingUp}
@@ -329,25 +347,33 @@ export const Dashboard = () => {
           </div>
 
           {/* Student SGPA Trend Chart */}
-          <div className="p-6 rounded-2xl obsidian-card">
-            <h3 className="text-base font-bold text-white mb-2">GPA Progression History</h3>
-            <p className="text-xs text-slate-400 mb-4">Semester-by-semester academic performance trend</p>
+          <div className="p-5 sm:p-6 rounded-xl bg-[#0F172A]/60 border border-cyan-500/25 backdrop-blur-xl tech-corners">
+            <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider mb-1">
+              // GPA PROGRESSION MATRIX
+            </h3>
+            <p className="text-xs text-slate-400 font-sans mb-4">Semester-by-semester academic achievement record</p>
             <div className="h-64 w-full">
               {data?.gpaHistory && data.gpaHistory.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.gpaHistory}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-                    <XAxis dataKey="semester" stroke="#94a3b8" fontSize={12} />
-                    <YAxis stroke="#94a3b8" fontSize={12} domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,242,254,0.1)" />
+                    <XAxis dataKey="semester" stroke="#64748b" fontSize={10} fontFamily="JetBrains Mono" />
+                    <YAxis stroke="#64748b" fontSize={10} domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} fontFamily="JetBrains Mono" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                      contentStyle={{ 
+                        backgroundColor: '#080C14', 
+                        borderColor: 'rgba(0,242,254,0.3)', 
+                        borderRadius: '8px',
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: '11px'
+                      }}
                     />
-                    <Bar dataKey="sgpa" fill="#06b6d4" radius={[8, 8, 0, 0]} name="SGPA" />
+                    <Bar dataKey="sgpa" fill="#00F2FE" radius={[4, 4, 0, 0]} name="SGPA" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-                  Results for the current semester are being processed.
+                <div className="h-full flex items-center justify-center text-slate-500 font-mono text-xs">
+                  // OFFICIAL TRANSCRIPT FOR THE CURRENT SEMESTER IS BEING PROCESSED.
                 </div>
               )}
             </div>

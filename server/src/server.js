@@ -17,6 +17,7 @@ import resultRoutes from './routes/resultRoutes.js';
 import reEvaluationRoutes from './routes/reEvaluationRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import auditRoutes from './routes/auditRoutes.js';
+import cappLabRoutes from './routes/cappLabRoutes.js';
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use(
 
 app.use(
   cors({
-    origin: '*',
+    origin: true,
     credentials: true,
   })
 );
@@ -72,6 +73,7 @@ app.use('/api/results', resultRoutes);
 app.use('/api/reevaluation', reEvaluationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/capp-lab', cappLabRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

@@ -1,112 +1,94 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../../context/ThemeContext';
 
 export const BackgroundAmbiance = () => {
-  const { currentTheme, isDark } = useTheme();
-
   // Generate lightweight deterministic background particle coordinates
   const particles = useMemo(() => {
-    return Array.from({ length: 24 }).map((_, i) => ({
+    return Array.from({ length: 28 }).map((_, i) => ({
       id: i,
       left: `${(i * 17) % 96 + 2}%`,
       top: `${(i * 23) % 94 + 3}%`,
-      size: (i % 3) + 2,
-      delay: (i % 5) * 0.8,
-      duration: 3.5 + (i % 4) * 1.2,
-      opacity: 0.2 + (i % 4) * 0.15,
+      size: (i % 3) + 1.5,
+      delay: (i % 5) * 0.7,
+      duration: 3 + (i % 4) * 1.5,
+      opacity: 0.15 + (i % 4) * 0.12,
+      isCyan: i % 3 === 0,
+      isPurple: i % 3 === 1,
     }));
   }, []);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
-      {/* 1. Base Midnight Cosmic Gradient or Pristine Frosted Light Quartz */}
-      <div
-        className={`absolute inset-0 transition-colors duration-700 ${
-          isDark
-            ? 'bg-gradient-to-b from-[#050711] via-[#070a16] to-[#04050b]'
-            : 'bg-gradient-to-b from-[#fcfcff] via-[#f7f6fc] to-[#edeaf8]'
-        }`}
-      />
+      {/* 1. Base Deep Space Void Black */}
+      <div className="absolute inset-0 bg-[#030508]" />
 
-      {/* 2. Top Overhead Spotlight / Ethereal Radiant Beam */}
-      <div
-        className={`absolute -top-32 left-1/2 -translate-x-1/2 w-[70vw] max-w-4xl h-80 rounded-full blur-[130px] transition-all duration-700 ${
-          isDark ? 'opacity-40' : 'opacity-25'
-        }`}
+      {/* 2. Cyber Mesh & Animated Radial Grid Overlay */}
+      <div 
+        className="absolute inset-0 opacity-40"
         style={{
-          background: `radial-gradient(ellipse at center, ${currentTheme.primary} 0%, ${currentTheme.secondary} 45%, transparent 75%)`,
+          backgroundImage: `
+            radial-gradient(circle at 50% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 60%),
+            radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+            linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '100% 100%, 100% 100%, 40px 40px, 40px 40px',
         }}
       />
 
-      {/* 3. Floating Aurora Nebula Orbs */}
+      {/* 3. Concentric Targeting Rings (Sci-Fi Radar Center) */}
+      <div 
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full pointer-events-none opacity-20 border border-cyan-500/10"
+        style={{
+          maskImage: 'radial-gradient(circle, black 30%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 75%)',
+        }}
+      >
+        <div className="absolute inset-24 rounded-full border border-cyan-500/10 border-dashed animate-radar" style={{ animationDuration: '30s' }} />
+        <div className="absolute inset-48 rounded-full border border-purple-500/10" />
+        <div className="absolute inset-72 rounded-full border border-cyan-500/15" />
+      </div>
+
+      {/* 4. Ambient Atmospheric Glow Orbs (Electric Purple & Neon Cyan) */}
       <motion.div
         animate={{
-          x: [0, 40, -20, 0],
-          y: [0, -30, 20, 0],
-          scale: [1, 1.1, 0.95, 1],
+          x: [0, 30, -20, 0],
+          y: [0, -25, 20, 0],
+          scale: [1, 1.08, 0.95, 1],
         }}
         transition={{
-          duration: 18,
+          duration: 20,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className={`absolute top-1/4 -left-20 w-[450px] h-[450px] rounded-full blur-[140px] pointer-events-none ${
-          isDark ? 'opacity-25' : 'opacity-15'
-        }`}
+        className="absolute -top-20 left-1/4 w-[600px] h-[350px] rounded-full blur-[140px] pointer-events-none opacity-25"
         style={{
-          background: `radial-gradient(circle, ${currentTheme.primary} 0%, transparent 70%)`,
+          background: 'radial-gradient(circle, #00F2FE 0%, #0088FF 40%, transparent 75%)',
         }}
       />
 
       <motion.div
         animate={{
-          x: [0, -35, 25, 0],
-          y: [0, 35, -25, 0],
-          scale: [1, 0.92, 1.08, 1],
+          x: [0, -30, 25, 0],
+          y: [0, 30, -20, 0],
+          scale: [1, 0.94, 1.06, 1],
         }}
         transition={{
-          duration: 22,
+          duration: 24,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className={`absolute bottom-1/6 -right-20 w-[480px] h-[480px] rounded-full blur-[150px] opacity-25 pointer-events-none ${
-          isDark ? 'opacity-25' : 'opacity-15'
-        }`}
+        className="absolute top-1/2 -right-24 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none opacity-20"
         style={{
-          background: `radial-gradient(circle, ${currentTheme.secondary} 0%, transparent 70%)`,
+          background: 'radial-gradient(circle, #8B5CF6 0%, #6366F1 45%, transparent 75%)',
         }}
       />
 
-      {/* 4. Center-Right Micro Ambient Glow */}
-      <div
-        className={`absolute top-2/3 left-1/3 w-80 h-80 rounded-full blur-[120px] pointer-events-none ${
-          isDark ? 'opacity-15' : 'opacity-10'
-        }`}
-        style={{
-          background: `radial-gradient(circle, ${currentTheme.accent} 0%, transparent 70%)`,
-        }}
-      />
-
-      {/* 5. Cyber Geometric Dot Matrix Grid Overlay */}
-      <div
-        className={`absolute inset-0 bg-repeat ${
-          isDark ? 'opacity-[0.14]' : 'opacity-[0.10]'
-        }`}
-        style={{
-          backgroundImage: isDark
-            ? 'radial-gradient(circle, rgba(255, 255, 255, 0.7) 1px, transparent 1px)'
-            : 'radial-gradient(circle, rgba(124, 58, 237, 0.35) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-          maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 40%, transparent 95%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, black 40%, transparent 95%)',
-        }}
-      />
-
-      {/* 6. Subtle Twinkling Quantum Stars / Compute Nodes */}
-      {isDark && (
-        <div className="absolute inset-0">
-          {particles.map((p) => (
+      {/* 5. Subtle Twinkling Quantum Node Particles */}
+      <div className="absolute inset-0">
+        {particles.map((p) => {
+          const color = p.isCyan ? '#00F2FE' : p.isPurple ? '#8B5CF6' : '#10B981';
+          return (
             <motion.div
               key={p.id}
               className="absolute rounded-full"
@@ -115,12 +97,12 @@ export const BackgroundAmbiance = () => {
                 top: p.top,
                 width: p.size,
                 height: p.size,
-                backgroundColor: p.id % 2 === 0 ? currentTheme.primary : '#ffffff',
-                boxShadow: `0 0 ${p.size * 3}px ${p.id % 2 === 0 ? currentTheme.primary : '#ffffff'}`,
+                backgroundColor: color,
+                boxShadow: `0 0 ${p.size * 3}px ${color}`,
               }}
               animate={{
-                opacity: [0.1, p.opacity, 0.1],
-                scale: [0.8, 1.25, 0.8],
+                opacity: [0.08, p.opacity, 0.08],
+                scale: [0.8, 1.3, 0.8],
               }}
               transition={{
                 duration: p.duration,
@@ -129,18 +111,17 @@ export const BackgroundAmbiance = () => {
                 ease: 'easeInOut',
               }}
             />
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
-      {/* 7. Subtle Vignette Edge Frame */}
-      <div
-        className={`absolute inset-0 ${
-          isDark
-            ? 'bg-gradient-to-t from-[#04050a]/80 via-transparent to-transparent'
-            : 'bg-gradient-to-t from-slate-200/40 via-transparent to-transparent'
-        }`}
-      />
+      {/* 6. Precision HUD Corner Decals */}
+      <div className="absolute top-4 left-4 text-[9px] font-mono text-cyan-500/20 tracking-widest hidden md:block">
+        SYS.GRID // 44.02-A // EPS-CORE
+      </div>
+      <div className="absolute bottom-4 right-4 text-[9px] font-mono text-cyan-500/20 tracking-widest hidden md:block">
+        PARALLEL_CORE // LATENCY: 0.2MS
+      </div>
     </div>
   );
 };

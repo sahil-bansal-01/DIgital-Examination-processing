@@ -38,6 +38,16 @@ const ProcessingRunSchema = new mongoose.Schema(
       merge: { type: Number, default: 0 },
       save: { type: Number, default: 0 },
     },
+    chunks: [
+      {
+        chunkId: { type: Number },
+        workerId: { type: Number },
+        startTime: { type: Number },
+        endTime: { type: Number },
+        durationMs: { type: Number },
+        recordCount: { type: Number },
+      },
+    ],
     totalTimeMs: { type: Number, required: true },
     speedup: { type: Number, default: 1 },
     efficiency: { type: Number, default: 1 },

@@ -12,6 +12,9 @@ import {
   ChevronRight,
   Filter,
   Eye,
+  Crosshair,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -33,14 +36,14 @@ import {
 } from 'recharts';
 
 const GRADE_COLORS = {
-  O: '#06b6d4',
-  'A+': '#3b82f6',
-  A: '#6366f1',
-  'B+': '#8b5cf6',
-  B: '#a855f7',
-  C: '#f59e0b',
-  P: '#10b981',
-  F: '#ef4444',
+  O: '#00F2FE',
+  'A+': '#38BDF8',
+  A: '#818CF8',
+  'B+': '#8B5CF6',
+  B: '#C084FC',
+  C: '#F59E0B',
+  P: '#10B981',
+  F: '#F43F5E',
 };
 
 export const ResultsReports = () => {
@@ -69,7 +72,6 @@ export const ResultsReports = () => {
         if (res.success && res.exams?.length > 0) {
           setExams(res.exams);
           if (!selectedExamId) {
-            // Pick first published or first exam
             const published = res.exams.find((e) => e.status === 'Published') || res.exams[0];
             setSelectedExamId(published._id);
           }
@@ -127,26 +129,35 @@ export const ResultsReports = () => {
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 font-mono">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Results Analytics & Official Reports</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Crosshair className="w-3.5 h-3.5" />
+              DISPATCH & SYNTHESIS // [07]
+            </span>
+            <Badge variant="cyan">PUBLISHED TRANSCRIPTS</Badge>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white uppercase">
+            RESULTS ANALYTICS & OFFICIAL DISPATCH
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 font-sans max-w-2xl">
             Section-wise performance distribution, topper leaderboards, subject difficulty indexes, and exportable grade registers.
           </p>
         </div>
 
         <Button variant="outline" icon={Download} onClick={handleExportCSV}>
-          Export CSV Register
+          EXPORT CSV REGISTER
         </Button>
       </div>
 
       {/* Selector & Filters Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+      <div className="p-4 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-xl backdrop-blur-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center tech-corners">
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Examination
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            EXAMINATION PROTOCOL
           </label>
           <select
             value={selectedExamId}
@@ -154,19 +165,19 @@ export const ResultsReports = () => {
               setSelectedExamId(e.target.value);
               setPage(1);
             }}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
             {exams.map((ex) => (
               <option key={ex._id} value={ex._id}>
-                {ex.title} ({ex.status})
+                {ex.title} [{ex.status?.toUpperCase()}]
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Section Filter
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            SECTION COHORT
           </label>
           <select
             value={selectedSection}
@@ -174,17 +185,17 @@ export const ResultsReports = () => {
               setSelectedSection(e.target.value);
               setPage(1);
             }}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
-            <option value="">All Cohorts (Section A & B)</option>
-            <option value="A">Section A</option>
-            <option value="B">Section B</option>
+            <option value="">ALL COHORTS (SECTION A & B)</option>
+            <option value="A">SECTION A</option>
+            <option value="B">SECTION B</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Evaluation Outcome
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            EVALUATION STATUS
           </label>
           <select
             value={selectedStatus}
@@ -192,17 +203,17 @@ export const ResultsReports = () => {
               setSelectedStatus(e.target.value);
               setPage(1);
             }}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
-            <option value="">All Candidates</option>
-            <option value="PASS">Passed Candidates</option>
-            <option value="FAIL">Backlog Candidates</option>
+            <option value="">ALL CANDIDATES</option>
+            <option value="PASS">PASSED CANDIDATES</option>
+            <option value="FAIL">BACKLOG CANDIDATES</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Search Candidate
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            SEARCH CANDIDATE
           </label>
           <form
             onSubmit={(e) => {
@@ -212,13 +223,13 @@ export const ResultsReports = () => {
             }}
             className="relative"
           >
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search candidate or roll..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
             />
           </form>
         </div>
@@ -246,7 +257,7 @@ export const ResultsReports = () => {
             value={analytics.averageSgpa}
             subtext="Cohort Mean Grade Point"
             icon={BarChart3}
-            color="indigo"
+            color="purple"
           />
           <StatCard
             title="Highest SGPA"
@@ -262,46 +273,46 @@ export const ResultsReports = () => {
       {analytics && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Toppers Leaderboard */}
-          <div className="lg:col-span-6 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md">
-            <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-400" />
-              Top Academic Performers (Dean's List)
+          <div className="lg:col-span-6 p-5 sm:p-6 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-xl backdrop-blur-xl tech-corners">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>TOP ACADEMIC PERFORMERS // DEAN'S LIST</span>
             </h3>
-            <p className="text-xs text-slate-400 mb-4">Rank leaders by aggregate weighted SGPA and percentage</p>
+            <p className="text-xs text-slate-400 font-sans mb-4">Rank leaders by aggregate weighted SGPA and percentage</p>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {analytics.toppers?.map((t) => (
                 <div
                   key={t.rollNumber}
-                  className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between"
+                  className="p-3 rounded-lg bg-[#080C14]/90 border border-cyan-500/20 flex items-center justify-between"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-bold text-xs ${
+                      className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs ${
                         t.rank === 1
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-[0_0_8px_rgba(245,158,11,0.3)]'
                           : t.rank === 2
                           ? 'bg-slate-300/20 text-slate-200 border border-slate-300/40'
                           : t.rank === 3
-                          ? 'bg-amber-700/20 text-amber-500 border border-amber-700/40'
+                          ? 'bg-amber-700/25 text-amber-400 border border-amber-700/40'
                           : 'bg-slate-800 text-slate-400'
                       }`}
                     >
                       #{t.rank}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white leading-tight">{t.name}</p>
-                      <p className="text-xs font-mono text-cyan-400">
-                        {t.rollNumber} • Sec {t.section}
+                      <p className="text-xs font-bold text-white leading-tight font-sans">{t.name}</p>
+                      <p className="text-[10px] text-cyan-400">
+                        {t.rollNumber} • SEC {t.section}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-base font-extrabold font-mono text-emerald-400">
-                      {t.sgpa} <span className="text-xs text-slate-500">SGPA</span>
+                    <span className="text-sm font-extrabold text-emerald-400">
+                      {t.sgpa} <span className="text-[10px] text-slate-500">SGPA</span>
                     </span>
-                    <p className="text-[11px] text-slate-400 font-mono">{t.percentage}% Aggregate</p>
+                    <p className="text-[10px] text-slate-400">{t.percentage}% AGGREGATE</p>
                   </div>
                 </div>
               ))}
@@ -309,10 +320,12 @@ export const ResultsReports = () => {
           </div>
 
           {/* Grade Distribution Chart */}
-          <div className="lg:col-span-6 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md flex flex-col justify-between">
+          <div className="lg:col-span-6 p-5 sm:p-6 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-xl backdrop-blur-xl flex flex-col justify-between tech-corners">
             <div>
-              <h3 className="text-base font-bold text-white mb-1">Grade Distribution Spectrum</h3>
-              <p className="text-xs text-slate-400 mb-4">Subject grades awarded across all candidate papers</p>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">
+                // GRADE DISTRIBUTION SPECTRUM
+              </h3>
+              <p className="text-xs text-slate-400 font-sans mb-4">Letter grades awarded across all candidate evaluations</p>
 
               <div className="h-60 w-full">
                 {pieData.length > 0 ? (
@@ -324,8 +337,8 @@ export const ResultsReports = () => {
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        outerRadius={80}
-                        innerRadius={45}
+                        outerRadius={75}
+                        innerRadius={42}
                         paddingAngle={4}
                         label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                       >
@@ -337,13 +350,19 @@ export const ResultsReports = () => {
                         ))}
                       </Pie>
                       <RechartsTooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                        contentStyle={{ 
+                          backgroundColor: '#080C14', 
+                          borderColor: 'rgba(0,242,254,0.3)', 
+                          borderRadius: '8px',
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: '11px'
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="h-full flex items-center justify-center text-slate-500 text-xs">
-                    No grade distribution data available
+                    // NO GRADE DISTRIBUTION DATA AVAILABLE
                   </div>
                 )}
               </div>
@@ -353,61 +372,63 @@ export const ResultsReports = () => {
       )}
 
       {/* TABULATED RESULTS REGISTER */}
-      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden backdrop-blur-md">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+      <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-xl tech-corners">
+        <div className="p-4 border-b border-cyan-500/20 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-white">Master Tabulation Register</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              // MASTER TABULATION REGISTER
+            </h3>
+            <p className="text-xs text-slate-400 font-sans">
               Complete published candidate scores, SGPA, pass/fail status, and section ranks
             </p>
           </div>
-          <span className="text-xs font-mono text-cyan-400">
-            {resultsData.totalCount} Registered Candidates
+          <span className="text-xs text-cyan-400">
+            {resultsData.totalCount} REGISTERED CANDIDATES
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-800/60 text-xs text-slate-400 font-mono uppercase">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider border-b border-cyan-500/20">
               <tr>
-                <th className="px-5 py-3.5">Rank</th>
-                <th className="px-5 py-3.5">Roll Number</th>
-                <th className="px-5 py-3.5">Student Name</th>
-                <th className="px-5 py-3.5">Section</th>
-                <th className="px-5 py-3.5">Sec Rank</th>
-                <th className="px-5 py-3.5">Marks Obtained</th>
-                <th className="px-5 py-3.5">Percentage</th>
-                <th className="px-5 py-3.5">SGPA</th>
-                <th className="px-5 py-3.5">Status</th>
-                <th className="px-5 py-3.5 text-center">Inspect</th>
+                <th className="px-4 py-3">RANK</th>
+                <th className="px-4 py-3">ROLL NUMBER</th>
+                <th className="px-4 py-3">CANDIDATE NAME</th>
+                <th className="px-4 py-3">SECTION</th>
+                <th className="px-4 py-3">SEC RANK</th>
+                <th className="px-4 py-3">MARKS</th>
+                <th className="px-4 py-3">%</th>
+                <th className="px-4 py-3">SGPA</th>
+                <th className="px-4 py-3">STATUS</th>
+                <th className="px-4 py-3 text-center">INSPECT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-800/60">
               {resultsData.results?.map((res) => (
-                <tr key={res._id} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5 font-mono font-bold text-white">#{res.overallRank}</td>
-                  <td className="px-5 py-3.5 font-mono font-bold text-cyan-400">{res.rollNumber}</td>
-                  <td className="px-5 py-3.5 font-medium text-white">{res.studentName}</td>
-                  <td className="px-5 py-3.5">
-                    <Badge variant="indigo">Sec {res.section}</Badge>
+                <tr key={res._id} className="hover:bg-slate-900/40 transition">
+                  <td className="px-4 py-2.5 font-bold text-white">#{res.overallRank}</td>
+                  <td className="px-4 py-2.5 font-bold text-cyan-400">{res.rollNumber}</td>
+                  <td className="px-4 py-2.5 font-medium text-white font-sans">{res.studentName}</td>
+                  <td className="px-4 py-2.5">
+                    <Badge variant="purple">SEC {res.section}</Badge>
                   </td>
-                  <td className="px-5 py-3.5 font-mono text-xs text-slate-400">#{res.sectionRank}</td>
-                  <td className="px-5 py-3.5 font-mono text-xs">
+                  <td className="px-4 py-2.5 text-slate-400">#{res.sectionRank}</td>
+                  <td className="px-4 py-2.5">
                     {res.totalMarksObtained} / {res.maxPossibleMarks}
                   </td>
-                  <td className="px-5 py-3.5 font-mono font-bold">{res.percentage}%</td>
-                  <td className="px-5 py-3.5 font-mono font-extrabold text-cyan-400 text-base">
+                  <td className="px-4 py-2.5 font-bold">{res.percentage}%</td>
+                  <td className="px-4 py-2.5 font-extrabold text-cyan-300 text-sm">
                     {res.sgpa}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-2.5">
                     <Badge variant={res.status === 'PASS' ? 'pass' : 'fail'}>
                       {res.status}
                     </Badge>
                   </td>
-                  <td className="px-5 py-3.5 text-center">
+                  <td className="px-4 py-2.5 text-center">
                     <button
                       onClick={() => setInspectStudent(res)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                      className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition"
                       title="Inspect Subject Breakdown"
                     >
                       <Eye className="w-4 h-4" />
@@ -420,9 +441,9 @@ export const ResultsReports = () => {
         </div>
 
         {/* Pagination Controls */}
-        <div className="p-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+        <div className="p-3.5 border-t border-cyan-500/20 flex items-center justify-between text-xs text-slate-400 font-mono">
           <span>
-            Page {resultsData.currentPage} of {resultsData.totalPages || 1}
+            PAGE {resultsData.currentPage} OF {resultsData.totalPages || 1}
           </span>
           <div className="flex gap-2">
             <Button
@@ -432,7 +453,7 @@ export const ResultsReports = () => {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Previous
+              PREV
             </Button>
             <Button
               size="sm"
@@ -440,7 +461,7 @@ export const ResultsReports = () => {
               disabled={page >= resultsData.totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next <ChevronRight className="w-4 h-4 ml-1" />
+              NEXT <ChevronRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           </div>
         </div>
@@ -450,38 +471,38 @@ export const ResultsReports = () => {
       <Modal
         isOpen={!!inspectStudent}
         onClose={() => setInspectStudent(null)}
-        title={`Candidate Evaluation Transcript: ${inspectStudent?.studentName}`}
+        title={`TRANSCRIPT // ${inspectStudent?.studentName}`}
         subtitle={`Roll: ${inspectStudent?.rollNumber} • Section ${inspectStudent?.section} • SGPA: ${inspectStudent?.sgpa}`}
         maxWidth="max-w-3xl"
       >
-        <div className="space-y-4">
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-800/80 uppercase font-mono text-slate-400">
+        <div className="space-y-4 font-mono text-xs">
+          <div className="overflow-x-auto rounded-lg border border-cyan-500/20">
+            <table className="w-full text-left text-slate-300">
+              <thead className="bg-slate-900/90 uppercase text-[10px] text-slate-400 border-b border-cyan-500/20">
                 <tr>
-                  <th className="px-3 py-2.5">Code</th>
-                  <th className="px-3 py-2.5">Subject</th>
-                  <th className="px-3 py-2.5">Credits</th>
-                  <th className="px-3 py-2.5">Internal</th>
-                  <th className="px-3 py-2.5">External</th>
-                  <th className="px-3 py-2.5">Total</th>
-                  <th className="px-3 py-2.5">Grade</th>
-                  <th className="px-3 py-2.5">Grade Point</th>
+                  <th className="px-3 py-2">CODE</th>
+                  <th className="px-3 py-2">SUBJECT</th>
+                  <th className="px-3 py-2">CREDITS</th>
+                  <th className="px-3 py-2">INT</th>
+                  <th className="px-3 py-2">EXT</th>
+                  <th className="px-3 py-2">TOTAL</th>
+                  <th className="px-3 py-2">GRADE</th>
+                  <th className="px-3 py-2">POINT</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-800/60">
                 {inspectStudent?.subjectResults?.map((sr, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/30">
-                    <td className="px-3 py-2 font-mono font-bold text-cyan-400">{sr.subjectCode}</td>
-                    <td className="px-3 py-2 text-white">{sr.subjectName}</td>
-                    <td className="px-3 py-2 font-mono">{sr.credits}</td>
-                    <td className="px-3 py-2 font-mono">{sr.internalMarks}</td>
-                    <td className="px-3 py-2 font-mono">{sr.externalMarks}</td>
-                    <td className="px-3 py-2 font-mono font-bold text-white">{sr.totalMarks}</td>
+                  <tr key={idx} className="hover:bg-slate-900/40">
+                    <td className="px-3 py-2 font-bold text-cyan-400">{sr.subjectCode}</td>
+                    <td className="px-3 py-2 text-white font-sans">{sr.subjectName}</td>
+                    <td className="px-3 py-2 font-bold text-purple-400">{sr.credits}</td>
+                    <td className="px-3 py-2">{sr.internalMarks}</td>
+                    <td className="px-3 py-2">{sr.externalMarks}</td>
+                    <td className="px-3 py-2 font-bold text-white">{sr.totalMarks}</td>
                     <td className="px-3 py-2">
-                      <span className="font-mono font-bold text-cyan-300">{sr.grade}</span>
+                      <span className="font-bold text-cyan-300">{sr.grade}</span>
                     </td>
-                    <td className="px-3 py-2 font-mono">{sr.gradePoint}</td>
+                    <td className="px-3 py-2">{sr.gradePoint}</td>
                   </tr>
                 ))}
               </tbody>
@@ -489,7 +510,7 @@ export const ResultsReports = () => {
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button variant="ghost" onClick={() => setInspectStudent(null)}>Close</Button>
+            <Button variant="ghost" onClick={() => setInspectStudent(null)}>CLOSE TRANSCRIPT</Button>
           </div>
         </div>
       </Modal>

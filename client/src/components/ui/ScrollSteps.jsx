@@ -29,7 +29,7 @@ export const STEPS_DATA = [
       'Automated candidate roster synchronization',
     ],
     icon: FileSpreadsheet,
-    color: '#8B5CF6',
+    color: '#00F2FE',
   },
   {
     id: 2,
@@ -43,7 +43,7 @@ export const STEPS_DATA = [
       'Immediate anomaly detection for absent/malpractice flags',
     ],
     icon: UploadCloud,
-    color: '#A855F7',
+    color: '#10B981',
   },
   {
     id: 3,
@@ -57,7 +57,7 @@ export const STEPS_DATA = [
       'Amdahl’s law metrics tracking speedup & efficiency',
     ],
     icon: Cpu,
-    color: '#C084FC',
+    color: '#00F2FE',
   },
   {
     id: 4,
@@ -71,7 +71,7 @@ export const STEPS_DATA = [
       'Immutable SHA-256 audit log generation',
     ],
     icon: Calculator,
-    color: '#D946EF',
+    color: '#8B5CF6',
   },
   {
     id: 5,
@@ -85,7 +85,7 @@ export const STEPS_DATA = [
       'Re-evaluation tracking and grade revision workflows',
     ],
     icon: Award,
-    color: '#EC4899',
+    color: '#00D2FF',
   },
 ];
 

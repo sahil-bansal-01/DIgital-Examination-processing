@@ -11,6 +11,9 @@ import {
   CheckCircle,
   Save,
   HelpCircle,
+  Crosshair,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -20,7 +23,7 @@ import { Modal } from '../components/ui/Modal';
 
 export const AcademicSetup = () => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('subjects'); // 'departments', 'courses', 'sections', 'subjects', 'teachers', 'grading'
+  const [activeTab, setActiveTab] = useState('subjects');
   
   // Data States
   const [departments, setDepartments] = useState([]);
@@ -152,43 +155,52 @@ export const AcademicSetup = () => {
   };
 
   const tabs = [
-    { id: 'subjects', label: 'Subjects & Credits', icon: BookOpen },
-    { id: 'teachers', label: 'Faculty Assignments', icon: GraduationCap },
-    { id: 'grading', label: 'Grading Scheme & Rules', icon: Sliders },
-    { id: 'departments', label: 'Departments & Sections', icon: Layers },
-    { id: 'students', label: 'Enrolled Candidates', icon: Users },
+    { id: 'subjects', label: 'Subjects & Credits', code: '01', icon: BookOpen },
+    { id: 'teachers', label: 'Faculty Assignments', code: '02', icon: GraduationCap },
+    { id: 'grading', label: 'Grading Rules Matrix', code: '03', icon: Sliders },
+    { id: 'departments', label: 'Departments & Sections', code: '04', icon: Layers },
+    { id: 'students', label: 'Candidate Roster', code: '05', icon: Users },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Academic Setup & Schemas</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Crosshair className="w-3.5 h-3.5" />
+              CURRICULUM ARCHITECTURE // [02]
+            </span>
+            <Badge variant="cyan">SCHEMA REGISTRY</Badge>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white uppercase">
+            ACADEMIC CONFIGURATION & SCHEMAS
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 font-sans max-w-2xl">
             Configure curriculum parameters, credit weightings, faculty assignments, and grading thresholds.
           </p>
         </div>
 
         {activeTab === 'subjects' && (
-          <Button variant="gradient" icon={Plus} onClick={() => setIsSubModalOpen(true)}>
-            Add Subject
+          <Button variant="primary" icon={Plus} onClick={() => setIsSubModalOpen(true)}>
+            NEW SUBJECT
           </Button>
         )}
         {activeTab === 'departments' && (
-          <Button variant="gradient" icon={Plus} onClick={() => setIsDeptModalOpen(true)}>
-            Add Department
+          <Button variant="primary" icon={Plus} onClick={() => setIsDeptModalOpen(true)}>
+            NEW DEPARTMENT
           </Button>
         )}
         {activeTab === 'teachers' && (
-          <Button variant="gradient" icon={Plus} onClick={() => setIsAssignModalOpen(true)}>
-            Assign Subject
+          <Button variant="primary" icon={Plus} onClick={() => setIsAssignModalOpen(true)}>
+            ASSIGN FACULTY
           </Button>
         )}
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto">
+      <div className="flex items-center gap-2 p-1.5 bg-[#0F172A]/70 border border-cyan-500/30 rounded-xl overflow-x-auto tech-corners">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -196,13 +208,14 @@ export const AcademicSetup = () => {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all select-none ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all select-none ${
                 isActive
-                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-[0_0_12px_rgba(0,242,254,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <span className="text-[10px] text-cyan-500">[{t.code}]</span>
+              <Icon className="w-3.5 h-3.5" />
               <span>{t.label}</span>
             </button>
           );
@@ -211,32 +224,32 @@ export const AcademicSetup = () => {
 
       {/* TAB 1: SUBJECTS */}
       {activeTab === 'subjects' && (
-        <div className="rounded-2xl bg-slate-900/80 border border-slate-800 overflow-hidden shadow-xl">
+        <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 overflow-hidden shadow-2xl backdrop-blur-xl tech-corners">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-800/60 text-xs text-slate-400 uppercase font-mono">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider border-b border-cyan-500/20">
                 <tr>
-                  <th className="px-5 py-3.5">Code</th>
-                  <th className="px-5 py-3.5">Subject Name</th>
-                  <th className="px-5 py-3.5">Dept</th>
-                  <th className="px-5 py-3.5">Sem</th>
-                  <th className="px-5 py-3.5">Credits</th>
-                  <th className="px-5 py-3.5">Max Internal</th>
-                  <th className="px-5 py-3.5">Max External</th>
-                  <th className="px-5 py-3.5">Pass %</th>
+                  <th className="px-4 py-3">COURSE CODE</th>
+                  <th className="px-4 py-3">SUBJECT TITLE</th>
+                  <th className="px-4 py-3">DEPT</th>
+                  <th className="px-4 py-3">SEMESTER</th>
+                  <th className="px-4 py-3">CREDITS</th>
+                  <th className="px-4 py-3">INTERNAL</th>
+                  <th className="px-4 py-3">EXTERNAL</th>
+                  <th className="px-4 py-3">PASS THRESHOLD</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-800/60">
                 {subjects.map((sub) => (
-                  <tr key={sub._id} className="hover:bg-slate-800/40 transition">
-                    <td className="px-5 py-3.5 font-mono font-bold text-cyan-400">{sub.code}</td>
-                    <td className="px-5 py-3.5 font-medium text-white">{sub.name}</td>
-                    <td className="px-5 py-3.5">{sub.department}</td>
-                    <td className="px-5 py-3.5 font-mono">Sem {sub.semester}</td>
-                    <td className="px-5 py-3.5 font-bold font-mono text-indigo-400">{sub.credits}</td>
-                    <td className="px-5 py-3.5 font-mono">{sub.maxInternalMarks}</td>
-                    <td className="px-5 py-3.5 font-mono">{sub.maxExternalMarks}</td>
-                    <td className="px-5 py-3.5 font-mono">{sub.passingPercentage}%</td>
+                  <tr key={sub._id} className="hover:bg-slate-900/40 transition">
+                    <td className="px-4 py-3 font-bold text-cyan-400">{sub.code}</td>
+                    <td className="px-4 py-3 font-medium text-white">{sub.name}</td>
+                    <td className="px-4 py-3">{sub.department}</td>
+                    <td className="px-4 py-3">SEM {sub.semester}</td>
+                    <td className="px-4 py-3 font-bold text-purple-400">{sub.credits}</td>
+                    <td className="px-4 py-3">{sub.maxInternalMarks}</td>
+                    <td className="px-4 py-3">{sub.maxExternalMarks}</td>
+                    <td className="px-4 py-3 font-bold text-emerald-400">{sub.passingPercentage}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -247,40 +260,40 @@ export const AcademicSetup = () => {
 
       {/* TAB 2: FACULTY ASSIGNMENTS */}
       {activeTab === 'teachers' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {teachers.map((t) => (
             <div
               key={t._id}
-              className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4"
+              className="p-5 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl backdrop-blur-xl space-y-4 tech-corners"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between pb-3 border-b border-cyan-500/20">
                 <div>
-                  <h3 className="text-base font-bold text-white">{t.name}</h3>
-                  <p className="text-xs text-slate-400">{t.designation} • {t.department}</p>
-                  <p className="text-xs font-mono text-cyan-400 mt-0.5">{t.email}</p>
+                  <h3 className="text-sm font-bold text-white uppercase">{t.name}</h3>
+                  <p className="text-xs text-slate-400 font-sans">{t.designation} • {t.department}</p>
+                  <p className="text-xs text-cyan-400 mt-0.5">{t.email}</p>
                 </div>
-                <Badge variant="indigo">{t.employeeId || 'FACULTY'}</Badge>
+                <Badge variant="cyan">{t.employeeId || 'FACULTY'}</Badge>
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Assigned Teaching Modules:
+                <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-2">
+                  ASSIGNED TEACHING MODULES:
                 </p>
                 {t.assignedSubjects?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {t.assignedSubjects.map((asgn, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"
+                        className="px-2.5 py-1 rounded bg-[#080C14] border border-cyan-500/30 text-xs font-medium text-slate-200 flex items-center gap-1.5"
                       >
-                        <span className="font-mono font-bold text-cyan-400">{asgn.subjectCode}</span>
-                        <span className="text-slate-400">({asgn.subjectName})</span>
-                        <Badge size="xs" variant="cyan">Sec {asgn.section}</Badge>
+                        <span className="font-bold text-cyan-400">{asgn.subjectCode}</span>
+                        <span className="text-slate-400 font-sans">({asgn.subjectName})</span>
+                        <Badge size="xs" variant="purple">SEC {asgn.section}</Badge>
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 italic">No assigned subjects yet.</p>
+                  <p className="text-xs text-slate-500 italic font-sans">// NO ASSIGNED SUBJECTS LOCATED.</p>
                 )}
               </div>
             </div>
@@ -291,24 +304,26 @@ export const AcademicSetup = () => {
       {/* TAB 3: GRADING SCHEME & RULES */}
       {activeTab === 'grading' && gradingScheme && (
         <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div className="p-5 sm:p-6 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl backdrop-blur-xl space-y-5 tech-corners">
+            <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div>
-                <h3 className="text-base font-bold text-white">Grading Scale & Boundary Parameters</h3>
-                <p className="text-xs text-slate-400">
-                  Relative/absolute letter grade boundaries, grade points (10-point scale), and grace mark rules.
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  // GRADING SCALE & BOUNDARY PARAMETERS
+                </h3>
+                <p className="text-xs text-slate-400 font-sans">
+                  Relative/absolute letter grade boundaries, 10-point UGC scale, and automated grace mark thresholds.
                 </p>
               </div>
               <Button variant="primary" icon={Save} onClick={handleSaveGrading}>
-                Save Changes
+                COMMIT RULES
               </Button>
             </div>
 
             {/* Grace Marks & Pass Criteria Controls */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Max Grace Marks Threshold
+              <div className="p-3.5 rounded-lg bg-[#080C14]/90 border border-cyan-500/20">
+                <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                  MAX GRACE MARKS THRESHOLD
                 </label>
                 <input
                   type="number"
@@ -318,16 +333,16 @@ export const AcademicSetup = () => {
                   onChange={(e) =>
                     setGradingScheme({ ...gradingScheme, maxGraceMarks: Number(e.target.value) })
                   }
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 bg-[#030508] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Automatically awarded if student is within N marks of passing
+                <span className="text-[10px] text-slate-500 mt-1 block font-sans">
+                  Awarded automatically if candidate is within N marks of passing
                 </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Subject Pass Threshold (%)
+              <div className="p-3.5 rounded-lg bg-[#080C14]/90 border border-cyan-500/20">
+                <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                  SUBJECT PASS THRESHOLD (%)
                 </label>
                 <input
                   type="number"
@@ -340,16 +355,16 @@ export const AcademicSetup = () => {
                       passPercentagePerSubject: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 bg-[#030508] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Minimum percentage required in each individual subject
+                <span className="text-[10px] text-slate-500 mt-1 block font-sans">
+                  Minimum percentage required in individual subject
                 </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Overall Aggregate Pass (%)
+              <div className="p-3.5 rounded-lg bg-[#080C14]/90 border border-cyan-500/20">
+                <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                  OVERALL AGGREGATE PASS (%)
                 </label>
                 <input
                   type="number"
@@ -362,35 +377,37 @@ export const AcademicSetup = () => {
                       overallPassPercentage: Number(e.target.value),
                     })
                   }
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 bg-[#030508] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Minimum aggregate percentage across all semester subjects
+                <span className="text-[10px] text-slate-500 mt-1 block font-sans">
+                  Minimum aggregate percentage across all subjects
                 </span>
               </div>
             </div>
 
             {/* Boundaries Table */}
             <div>
-              <h4 className="text-sm font-bold text-white mb-3">Letter Grade Scale Boundaries</h4>
-              <div className="overflow-x-auto rounded-xl border border-slate-800">
-                <table className="w-full text-left text-sm text-slate-300">
-                  <thead className="bg-slate-800/60 text-xs text-slate-400 font-mono uppercase">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
+                LETTER GRADE CUTOFF BOUNDARIES
+              </h4>
+              <div className="overflow-x-auto rounded-lg border border-cyan-500/20">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase border-b border-cyan-500/20">
                     <tr>
-                      <th className="px-4 py-3">Grade</th>
-                      <th className="px-4 py-3">Classification Label</th>
-                      <th className="px-4 py-3">Minimum % Cutoff</th>
-                      <th className="px-4 py-3">Grade Point</th>
+                      <th className="px-4 py-2.5">GRADE</th>
+                      <th className="px-4 py-2.5">CLASSIFICATION LABEL</th>
+                      <th className="px-4 py-2.5">MIN % CUTOFF</th>
+                      <th className="px-4 py-2.5">GRADE POINT</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800">
+                  <tbody className="divide-y divide-slate-800/60">
                     {gradingScheme.boundaries?.map((b, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/30">
-                        <td className="px-4 py-2.5 font-bold font-mono text-cyan-400 text-base">
+                      <tr key={idx} className="hover:bg-slate-900/40">
+                        <td className="px-4 py-2 font-bold text-cyan-400 text-sm">
                           {b.grade}
                         </td>
-                        <td className="px-4 py-2.5 text-white font-medium">{b.label}</td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-2 text-white font-sans">{b.label}</td>
+                        <td className="px-4 py-2">
                           <input
                             type="number"
                             value={b.minPercentage}
@@ -399,10 +416,10 @@ export const AcademicSetup = () => {
                               newBoundaries[idx].minPercentage = Number(e.target.value);
                               setGradingScheme({ ...gradingScheme, boundaries: newBoundaries });
                             }}
-                            className="w-24 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-white font-mono text-xs focus:border-cyan-500 focus:outline-none"
+                            className="w-20 px-2 py-0.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                           />
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-2">
                           <input
                             type="number"
                             step="0.5"
@@ -412,7 +429,7 @@ export const AcademicSetup = () => {
                               newBoundaries[idx].gradePoint = Number(e.target.value);
                               setGradingScheme({ ...gradingScheme, boundaries: newBoundaries });
                             }}
-                            className="w-20 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-indigo-400 font-mono text-xs focus:border-cyan-500 focus:outline-none"
+                            className="w-16 px-2 py-0.5 bg-[#080C14] border border-cyan-500/30 rounded text-purple-400 font-mono text-xs focus:border-cyan-400 focus:outline-none"
                           />
                         </td>
                       </tr>
@@ -427,39 +444,43 @@ export const AcademicSetup = () => {
 
       {/* TAB 4: DEPARTMENTS & SECTIONS */}
       {activeTab === 'departments' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Departments */}
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white">Academic Departments</h3>
-            <div className="space-y-3">
+          <div className="p-5 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl backdrop-blur-xl space-y-4 tech-corners">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              // ACADEMIC DEPARTMENTS
+            </h3>
+            <div className="space-y-2.5">
               {departments.map((d) => (
-                <div key={d._id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-800 flex items-center justify-between">
+                <div key={d._id} className="p-3 rounded-lg bg-[#080C14]/90 border border-cyan-500/20 flex items-center justify-between">
                   <div>
-                    <span className="font-mono font-bold text-cyan-400 text-sm">{d.code}</span>
+                    <span className="font-bold text-cyan-400 text-xs">{d.code}</span>
                     <p className="text-xs text-white font-medium">{d.name}</p>
-                    <p className="text-[11px] text-slate-400">{d.description}</p>
+                    <p className="text-[10px] text-slate-400 font-sans">{d.description}</p>
                   </div>
-                  <Badge variant="cyan">Active</Badge>
+                  <Badge variant="cyan">ACTIVE</Badge>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Sections */}
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white">Configured Class Sections</h3>
-            <div className="space-y-3">
+          <div className="p-5 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl backdrop-blur-xl space-y-4 tech-corners">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              // COHORT SECTIONS
+            </h3>
+            <div className="space-y-2.5">
               {sections.map((s) => (
-                <div key={s._id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-800 flex items-center justify-between">
+                <div key={s._id} className="p-3 rounded-lg bg-[#080C14]/90 border border-cyan-500/20 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-white text-sm">
-                      Section {s.name} ({s.department})
+                    <span className="font-bold text-white text-xs">
+                      SECTION {s.name} ({s.department})
                     </span>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-400 font-sans">
                       Semester {s.semester} • Academic Year {s.academicYear}
                     </p>
                   </div>
-                  <Badge variant="indigo">Capacity: {s.capacity}</Badge>
+                  <Badge variant="purple">CAPACITY: {s.capacity}</Badge>
                 </div>
               ))}
             </div>
@@ -469,35 +490,35 @@ export const AcademicSetup = () => {
 
       {/* TAB 5: STUDENTS */}
       {activeTab === 'students' && (
-        <div className="rounded-2xl bg-slate-900/80 border border-slate-800 overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <span className="text-sm font-bold text-white">
-              Enrolled Student Roster ({students.length} Candidates)
+        <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 overflow-hidden shadow-2xl backdrop-blur-xl tech-corners">
+          <div className="p-3.5 border-b border-cyan-500/20 flex items-center justify-between">
+            <span className="text-xs font-bold text-white uppercase">
+              // ENROLLED CANDIDATE ROSTER ({students.length} CANDIDATES)
             </span>
-            <Badge variant="emerald">Batch 2024-2028</Badge>
+            <Badge variant="emerald">BATCH 2024-2028</Badge>
           </div>
           <div className="overflow-x-auto max-h-[500px]">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-800/60 text-xs text-slate-400 font-mono uppercase sticky top-0">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider sticky top-0 border-b border-cyan-500/20">
                 <tr>
-                  <th className="px-5 py-3">Roll Number</th>
-                  <th className="px-5 py-3">Student Name</th>
-                  <th className="px-5 py-3">Email</th>
-                  <th className="px-5 py-3">Dept</th>
-                  <th className="px-5 py-3">Semester</th>
-                  <th className="px-5 py-3">Section</th>
+                  <th className="px-4 py-2.5">ROLL NUMBER</th>
+                  <th className="px-4 py-2.5">CANDIDATE NAME</th>
+                  <th className="px-4 py-2.5">EMAIL</th>
+                  <th className="px-4 py-2.5">DEPT</th>
+                  <th className="px-4 py-2.5">SEMESTER</th>
+                  <th className="px-4 py-2.5">SECTION</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-800/60">
                 {students.map((std) => (
-                  <tr key={std._id} className="hover:bg-slate-800/30">
-                    <td className="px-5 py-3 font-mono font-bold text-cyan-400">{std.rollNumber}</td>
-                    <td className="px-5 py-3 font-medium text-white">{std.name}</td>
-                    <td className="px-5 py-3 text-xs text-slate-400 font-mono">{std.email}</td>
-                    <td className="px-5 py-3">{std.department}</td>
-                    <td className="px-5 py-3 font-mono">Sem {std.semester}</td>
-                    <td className="px-5 py-3">
-                      <Badge variant="indigo">Section {std.section}</Badge>
+                  <tr key={std._id} className="hover:bg-slate-900/40">
+                    <td className="px-4 py-2 font-bold text-cyan-400">{std.rollNumber}</td>
+                    <td className="px-4 py-2 font-medium text-white font-sans">{std.name}</td>
+                    <td className="px-4 py-2 text-slate-400">{std.email}</td>
+                    <td className="px-4 py-2">{std.department}</td>
+                    <td className="px-4 py-2">SEM {std.semester}</td>
+                    <td className="px-4 py-2">
+                      <Badge variant="purple">SEC {std.section}</Badge>
                     </td>
                   </tr>
                 ))}
@@ -511,81 +532,81 @@ export const AcademicSetup = () => {
       <Modal
         isOpen={isSubModalOpen}
         onClose={() => setIsSubModalOpen(false)}
-        title="Add Curriculum Subject"
+        title="ADD CURRICULUM SUBJECT"
         subtitle="Define course code, credits, passing threshold, and evaluation weights"
       >
         <form onSubmit={handleCreateSubject} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject Code</label>
+              <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">COURSE CODE</label>
               <input
                 type="text"
                 placeholder="e.g. CS307"
                 value={subForm.code}
                 onChange={(e) => setSubForm({ ...subForm, code: e.target.value.toUpperCase() })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+                className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Credits</label>
+              <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">CREDITS</label>
               <input
                 type="number"
                 min="1"
                 max="8"
                 value={subForm.credits}
                 onChange={(e) => setSubForm({ ...subForm, credits: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+                className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject Name</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">SUBJECT TITLE</label>
             <input
               type="text"
               placeholder="e.g. Cloud Computing & Distributed Systems"
               value={subForm.name}
               onChange={(e) => setSubForm({ ...subForm, name: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
               required
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Max Internal</label>
+              <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">MAX INTERNAL</label>
               <input
                 type="number"
                 value={subForm.maxInternalMarks}
                 onChange={(e) => setSubForm({ ...subForm, maxInternalMarks: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm"
+                className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Max External</label>
+              <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">MAX EXTERNAL</label>
               <input
                 type="number"
                 value={subForm.maxExternalMarks}
                 onChange={(e) => setSubForm({ ...subForm, maxExternalMarks: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm"
+                className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Pass %</label>
+              <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">PASS %</label>
               <input
                 type="number"
                 value={subForm.passingPercentage}
                 onChange={(e) => setSubForm({ ...subForm, passingPercentage: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm"
+                className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button variant="ghost" onClick={() => setIsSubModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="gradient">Create Subject</Button>
+          <div className="flex justify-end gap-3 pt-3 border-t border-cyan-500/20">
+            <Button variant="ghost" onClick={() => setIsSubModalOpen(false)}>CANCEL</Button>
+            <Button type="submit" variant="primary">INITIALISE SUBJECT</Button>
           </div>
         </form>
       </Modal>
@@ -594,19 +615,19 @@ export const AcademicSetup = () => {
       <Modal
         isOpen={isAssignModalOpen}
         onClose={() => setIsAssignModalOpen(false)}
-        title="Assign Faculty Evaluator"
+        title="ASSIGN FACULTY EVALUATOR"
         subtitle="Grant marks entry and review privileges for a subject and section cohort"
       >
         <form onSubmit={handleAssignTeacher} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Select Faculty</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">FACULTY EVALUATOR</label>
             <select
               value={assignForm.teacherId}
               onChange={(e) => setAssignForm({ ...assignForm, teacherId: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
               required
             >
-              <option value="">-- Choose Instructor --</option>
+              <option value="">SELECT FACULTY MEMBER</option>
               {teachers.map((t) => (
                 <option key={t._id} value={t._id}>
                   {t.name} ({t.department})
@@ -616,14 +637,14 @@ export const AcademicSetup = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject Offering</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">SUBJECT MODULE</label>
             <select
               value={assignForm.subjectId}
               onChange={(e) => setAssignForm({ ...assignForm, subjectId: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
               required
             >
-              <option value="">-- Choose Subject --</option>
+              <option value="">SELECT SUBJECT</option>
               {subjects.map((s) => (
                 <option key={s._id} value={s._id}>
                   {s.code} - {s.name}
@@ -633,21 +654,20 @@ export const AcademicSetup = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Section Cohort</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">COHORT SECTION</label>
             <select
               value={assignForm.section}
               onChange={(e) => setAssignForm({ ...assignForm, section: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
             >
-              <option value="A">Section A</option>
-              <option value="B">Section B</option>
-              <option value="C">Section C</option>
+              <option value="A">SECTION A</option>
+              <option value="B">SECTION B</option>
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button variant="ghost" onClick={() => setIsAssignModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="gradient">Save Assignment</Button>
+          <div className="flex justify-end gap-3 pt-3 border-t border-cyan-500/20">
+            <Button variant="ghost" onClick={() => setIsAssignModalOpen(false)}>CANCEL</Button>
+            <Button type="submit" variant="primary">COMMIT ASSIGNMENT</Button>
           </div>
         </form>
       </Modal>
@@ -656,35 +676,48 @@ export const AcademicSetup = () => {
       <Modal
         isOpen={isDeptModalOpen}
         onClose={() => setIsDeptModalOpen(false)}
-        title="Register Academic Department"
-        subtitle="Create an organizational unit for courses, subjects, and candidate tracks"
+        title="ADD ACADEMIC DEPARTMENT"
+        subtitle="Establish department code, name, and administrative description"
       >
         <form onSubmit={handleCreateDept} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Department Code</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">DEPARTMENT CODE</label>
             <input
               type="text"
-              placeholder="e.g. MECH"
+              placeholder="e.g. AI-DS"
               value={deptForm.code}
               onChange={(e) => setDeptForm({ ...deptForm, code: e.target.value.toUpperCase() })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
               required
             />
           </div>
+
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Department Name</label>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">DEPARTMENT NAME</label>
             <input
               type="text"
-              placeholder="e.g. Mechanical Engineering"
+              placeholder="e.g. Artificial Intelligence & Data Science"
               value={deptForm.name}
               onChange={(e) => setDeptForm({ ...deptForm, name: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-cyan-500 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
               required
             />
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button variant="ghost" onClick={() => setIsDeptModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="gradient">Create Department</Button>
+
+          <div>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">DESCRIPTION</label>
+            <textarea
+              rows={3}
+              placeholder="Curriculum overview..."
+              value={deptForm.description}
+              onChange={(e) => setDeptForm({ ...deptForm, description: e.target.value })}
+              className="w-full p-2 bg-[#080C14] border border-cyan-500/30 rounded text-white text-xs focus:border-cyan-400 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-cyan-500/20">
+            <Button variant="ghost" onClick={() => setIsDeptModalOpen(false)}>CANCEL</Button>
+            <Button type="submit" variant="primary">CREATE DEPARTMENT</Button>
           </div>
         </form>
       </Modal>

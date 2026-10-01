@@ -134,12 +134,24 @@ export const runSequentialProcessing = async ({
   const finalMem = process.memoryUsage().heapUsed;
   const throughput = totalTimeMs > 0 ? Number(((total / totalTimeMs) * 1000).toFixed(0)) : 0;
 
+  const chunks = [
+    {
+      chunkId: 1,
+      workerId: 1,
+      startTime: Number((computeStart - overallStart).toFixed(2)),
+      endTime: Number((performance.now() - overallStart).toFixed(2)),
+      durationMs: timings.compute,
+      recordCount: total,
+    },
+  ];
+
   return {
     mode: 'sequential',
     recordCount: total,
     workerCount: 1,
     chunkSize: total,
     stageTimings: timings,
+    chunks,
     totalTimeMs,
     speedup: 1.0,
     efficiency: 1.0,
@@ -250,6 +262,18 @@ export const runParallelProcessing = async ({
   const speedup = Number((baseTime / totalTimeMs).toFixed(2));
   const efficiency = Number((speedup / numWorkers).toFixed(2));
 
+  // Format chunk timings
+  const chunkTimings = chunkResults
+    .filter((cr) => cr && cr.chunkTiming)
+    .map((cr) => ({
+      chunkId: cr.chunkTiming.chunkId,
+      workerId: cr.chunkTiming.workerId,
+      startTime: Number(Math.max(0, cr.chunkTiming.startTime - overallStart).toFixed(2)),
+      endTime: Number(Math.max(0, cr.chunkTiming.endTime - overallStart).toFixed(2)),
+      durationMs: cr.chunkTiming.durationMs,
+      recordCount: cr.chunkTiming.recordCount,
+    }));
+
   return {
     mode: 'parallel',
     recordCount: total,
@@ -257,6 +281,7 @@ export const runParallelProcessing = async ({
     chunkSize: chunks[0]?.records?.length || 0,
     chunkingStrategy: chunkStrategy,
     stageTimings: timings,
+    chunks: chunkTimings,
     totalTimeMs,
     speedup,
     efficiency,

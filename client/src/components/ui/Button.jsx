@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 export const Button = ({
   children,
   onClick,
-  variant = 'primary', // 'primary', 'secondary', 'danger', 'outline', 'ghost', 'gradient'
+  variant = 'primary', // 'primary', 'secondary', 'danger', 'outline', 'ghost', 'gradient', 'emerald'
   size = 'md', // 'sm', 'md', 'lg'
   disabled = false,
   loading = false,
@@ -14,27 +14,29 @@ export const Button = ({
   icon: Icon,
 }) => {
   const base =
-    'relative inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 select-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed';
+    'relative inline-flex items-center justify-center font-mono font-bold tracking-wider uppercase transition-all duration-150 select-none focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-40 disabled:cursor-not-allowed';
 
   const sizeMap = {
-    sm: 'text-xs px-3 py-1.5 gap-1.5',
-    md: 'text-sm px-4 py-2.5 gap-2',
-    lg: 'text-base px-5 py-3 gap-2.5',
+    sm: 'text-xs px-3 py-1.5 gap-1.5 rounded-lg',
+    md: 'text-xs px-4 py-2.5 gap-2 rounded-lg',
+    lg: 'text-sm px-5 py-3 gap-2.5 rounded-xl',
   };
 
   const variantMap = {
     primary:
-      'bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30',
+      'bg-[#00F2FE] hover:bg-[#00D2FF] text-slate-950 font-extrabold shadow-[0_0_16px_rgba(0,242,254,0.35)] hover:shadow-[0_0_25px_rgba(0,242,254,0.6)] border border-cyan-300',
     secondary:
-      'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700/60 shadow-md',
+      'bg-[#0F172A]/80 hover:bg-[#1E293B] text-slate-200 border border-cyan-500/30 hover:border-cyan-400 shadow-md',
     gradient:
-      'bg-gradient-to-r from-cyan-500 via-indigo-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/25',
+      'bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-[0_0_18px_rgba(0,242,254,0.25)] border border-cyan-500/40',
+    emerald:
+      'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.35)] border border-emerald-300',
     danger:
-      'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20',
+      'bg-rose-600/90 hover:bg-rose-500 text-white shadow-[0_0_16px_rgba(244,63,94,0.3)] border border-rose-500/40',
     outline:
-      'border border-slate-700 hover:border-cyan-500/60 text-slate-300 hover:text-cyan-400 bg-transparent',
+      'border border-cyan-500/50 hover:border-cyan-400 text-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_14px_rgba(0,242,254,0.2)] bg-transparent',
     ghost:
-      'text-slate-400 hover:text-white hover:bg-slate-800/60',
+      'text-slate-400 hover:text-cyan-300 hover:bg-slate-800/50',
   };
 
   return (
@@ -47,11 +49,11 @@ export const Button = ({
       className={`${base} ${sizeMap[size]} ${variantMap[variant]} ${className}`}
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin text-current" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-current" />
       ) : Icon ? (
-        <Icon className="w-4 h-4 shrink-0" />
+        <Icon className="w-3.5 h-3.5 shrink-0" />
       ) : null}
-      {children}
+      <span>{children}</span>
     </motion.button>
   );
 };

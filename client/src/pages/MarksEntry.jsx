@@ -13,6 +13,10 @@ import {
   RefreshCw,
   XCircle,
   FileDown,
+  Crosshair,
+  Terminal,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -33,7 +37,7 @@ export const MarksEntry = () => {
 
   const [subjects, setSubjects] = useState([]);
   const [students, setStudents] = useState([]);
-  const [marksData, setMarksData] = useState({}); // rollNumber -> { internalMarks, externalMarks, isAbsent }
+  const [marksData, setMarksData] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,7 +48,6 @@ export const MarksEntry = () => {
   const [validationReport, setValidationReport] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Selected Exam object for lock status
   const currentExam = exams.find((e) => e._id === selectedExamId);
   const currentSubject = subjects.find((s) => s._id === selectedSubjectId);
 
@@ -72,7 +75,6 @@ export const MarksEntry = () => {
     const exam = exams.find((e) => e._id === selectedExamId);
     if (exam && exam.subjects?.length > 0) {
       let allowedSubjects = exam.subjects;
-      // If teacher, filter by assigned subjects
       if (isTeacher && user?.assignedSubjects) {
         const assignedCodes = user.assignedSubjects.map((a) => a.subjectCode);
         allowedSubjects = exam.subjects.filter((s) => assignedCodes.includes(s.code || s));
@@ -89,18 +91,15 @@ export const MarksEntry = () => {
     if (!selectedExamId || !selectedSubjectId) return;
     setLoading(true);
     try {
-      // Fetch students for section
       const stdRes = await api.get(`/academic/students?section=${selectedSection}`);
       const studentsList = stdRes.students || [];
       setStudents(studentsList);
 
-      // Fetch existing marks
       const marksRes = await api.get(
         `/marks?examId=${selectedExamId}&subjectId=${selectedSubjectId}&section=${selectedSection}`
       );
       const markMap = {};
 
-      // Seed with student blanks
       studentsList.forEach((std) => {
         markMap[std.rollNumber] = {
           studentId: std._id,
@@ -112,7 +111,6 @@ export const MarksEntry = () => {
         };
       });
 
-      // Populate saved marks
       if (marksRes.success && marksRes.marks) {
         marksRes.marks.forEach((m) => {
           if (markMap[m.rollNumber]) {
@@ -164,7 +162,7 @@ export const MarksEntry = () => {
   const handleSaveGrid = async () => {
     if (!selectedExamId || !selectedSubjectId) return;
     if (currentExam?.isMarksEntryLocked) {
-      toast.error('Cannot save marks: This exam is locked by the Exam Cell.');
+      toast.error('ACCESS REJECTED: Exam is locked by Exam Cell.');
       return;
     }
 
@@ -185,7 +183,7 @@ export const MarksEntry = () => {
       });
 
       if (res.success) {
-        toast.success(`Successfully saved marks for ${res.count} students!`);
+        toast.success(`Marks committed for ${res.count} candidates!`);
         fetchMarksSheet();
       }
     } catch (err) {
@@ -195,18 +193,16 @@ export const MarksEntry = () => {
     }
   };
 
-  // CSV Validation & Import
   const handleValidateCsv = async (commit = false) => {
     if (!csvText.trim()) {
-      toast.error('Please paste or upload CSV content');
+      toast.error('INPUT ERROR: CSV content empty');
       return;
     }
 
     setUploading(true);
     try {
-      // Parse CSV text into rows
       const lines = csvText.trim().split('\n');
-      if (lines.length < 2) throw new Error('CSV must have a header line and at least one data row');
+      if (lines.length < 2) throw new Error('CSV must have header line and data rows');
 
       const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
       const rows = [];
@@ -233,12 +229,12 @@ export const MarksEntry = () => {
       setValidationReport(res);
 
       if (commit && res.committed) {
-        toast.success(`Imported ${res.savedCount} valid student mark records into the database!`);
+        toast.success(`Imported ${res.savedCount} candidate marks into database!`);
         setIsCsvModalOpen(false);
         setCsvText('');
         fetchMarksSheet();
       } else if (!commit) {
-        toast.info(`Validation complete: ${res.validCount} valid, ${res.errorCount} errors flagged.`);
+        toast.info(`Telemetry Scan: ${res.validCount} valid, ${res.errorCount} anomalies detected.`);
       }
     } catch (err) {
       toast.error(err.message || 'CSV processing failed');
@@ -281,59 +277,68 @@ export const MarksEntry = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Marks Entry & Evaluation Grid</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Spreadsheet-style marks entry with boundary enforcement, CSV validation engine, and full audit trail.
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Crosshair className="w-3.5 h-3.5" />
+              TELEMETRY INGESTION MATRIX // [04]
+            </span>
+            <Badge variant="cyan">CLIENT-SIDE SCHEMA AUDIT</Badge>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white uppercase">
+            MARKS ENTRY & EVALUATION MATRIX
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 font-sans max-w-2xl">
+            Spreadsheet-style telemetry entry with instantaneous boundary enforcement and CSV validation parser.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Button variant="outline" icon={Upload} onClick={() => setIsCsvModalOpen(true)}>
-            Upload CSV / Excel
+            UPLOAD CSV //
           </Button>
 
           <Button
-            variant="gradient"
+            variant="primary"
             icon={Save}
             loading={saving}
             disabled={currentExam?.isMarksEntryLocked}
             onClick={handleSaveGrid}
           >
-            Save All Marks
+            COMMIT MARKS MATRIX
           </Button>
         </div>
       </div>
 
       {/* Lock Status Banner */}
       {currentExam?.isMarksEntryLocked && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300">
+        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 flex items-center gap-3 text-rose-300 tech-corners">
           <Lock className="w-5 h-5 text-rose-400 shrink-0" />
-          <div className="text-xs">
-            <span className="font-bold">Marks Entry is Currently Locked:</span> The Exam Cell has locked this examination.
-            All cells are in read-only mode until an administrator re-enables submission.
+          <div className="text-xs font-mono">
+            <span className="font-bold text-white uppercase">[ PROTOCOL LOCKED ]:</span> Exam Cell has cryptographically locked this evaluation window.
+            All input nodes are set to read-only until an authorized key restores write access.
           </div>
         </div>
       )}
 
       {/* Filter / Selector Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+      <div className="p-4 rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-xl backdrop-blur-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center tech-corners">
         {/* Exam Select */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Examination
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            EXAMINATION PROTOCOL
           </label>
           <select
             value={selectedExamId}
             onChange={(e) => setSelectedExamId(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
             {exams.map((ex) => (
               <option key={ex._id} value={ex._id}>
-                {ex.title} ({ex.status})
+                {ex.title} [{ex.status?.toUpperCase()}]
               </option>
             ))}
           </select>
@@ -341,13 +346,13 @@ export const MarksEntry = () => {
 
         {/* Subject Select */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Subject Offering
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            SUBJECT OFFERING
           </label>
           <select
             value={selectedSubjectId}
             onChange={(e) => setSelectedSubjectId(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
             {subjects.map((sub) => (
               <option key={sub._id || sub} value={sub._id || sub}>
@@ -359,82 +364,82 @@ export const MarksEntry = () => {
 
         {/* Section Select */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Section Cohort
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            COHORT SECTION
           </label>
           <select
             value={selectedSection}
             onChange={(e) => setSelectedSection(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
           >
-            <option value="A">Section A</option>
-            <option value="B">Section B</option>
+            <option value="A">SECTION A</option>
+            <option value="B">SECTION B</option>
           </select>
         </div>
 
         {/* Search Input */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Candidate Filter
+          <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+            CANDIDATE FILTER
           </label>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search candidate or roll..."
+              placeholder="Filter candidate or roll..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
             />
           </div>
         </div>
       </div>
 
       {/* Spreadsheet Editable Grid */}
-      <div className="rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden backdrop-blur-md">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
+      <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-xl tech-corners">
+        <div className="p-3.5 border-b border-cyan-500/20 flex flex-wrap items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">
+            <span className="font-bold text-white uppercase">
               {currentSubject?.code || 'Subject'} - {currentSubject?.name || ''}
             </span>
-            <span className="text-slate-500">•</span>
-            <span>Max Internal: <strong className="text-white font-mono">{currentSubject?.maxInternalMarks || 30}</strong></span>
-            <span className="text-slate-500">•</span>
-            <span>Max External: <strong className="text-white font-mono">{currentSubject?.maxExternalMarks || 70}</strong></span>
-            <span className="text-slate-500">•</span>
-            <span>Total Max: <strong className="text-cyan-400 font-mono">100</strong></span>
+            <span className="text-slate-600">|</span>
+            <span>MAX INTERNAL: <strong className="text-cyan-400">{currentSubject?.maxInternalMarks || 30}</strong></span>
+            <span className="text-slate-600">|</span>
+            <span>MAX EXTERNAL: <strong className="text-cyan-400">{currentSubject?.maxExternalMarks || 70}</strong></span>
+            <span className="text-slate-600">|</span>
+            <span>MAX TOTAL: <strong className="text-emerald-400">100</strong></span>
           </div>
 
-          <div className="font-mono">
-            Showing {filteredStudents.length} of {students.length} Candidates
+          <div className="text-[11px] text-slate-400">
+            SHOWING {filteredStudents.length} OF {students.length} CANDIDATES
           </div>
         </div>
 
-        <div className="overflow-x-auto max-h-[600px]">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-800/80 text-xs text-slate-400 font-mono uppercase sticky top-0 z-10 backdrop-blur-md">
+        <div className="overflow-x-auto max-h-[580px]">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md border-b border-cyan-500/20">
               <tr>
-                <th className="px-5 py-3 w-16">#</th>
-                <th className="px-5 py-3 w-36">Roll Number</th>
-                <th className="px-5 py-3">Student Name</th>
-                <th className="px-5 py-3 text-center w-28">Status</th>
-                <th className="px-5 py-3 w-40">Internal ({currentSubject?.maxInternalMarks || 30})</th>
-                <th className="px-5 py-3 w-40">External ({currentSubject?.maxExternalMarks || 70})</th>
-                <th className="px-5 py-3 w-32 font-bold text-cyan-400">Total (100)</th>
+                <th className="px-4 py-3 w-14">#</th>
+                <th className="px-4 py-3 w-36">ROLL NUMBER</th>
+                <th className="px-4 py-3">CANDIDATE NAME</th>
+                <th className="px-4 py-3 text-center w-28">STATUS</th>
+                <th className="px-4 py-3 w-36">INTERNAL ({currentSubject?.maxInternalMarks || 30})</th>
+                <th className="px-4 py-3 w-36">EXTERNAL ({currentSubject?.maxExternalMarks || 70})</th>
+                <th className="px-4 py-3 w-28 font-bold text-cyan-400">TOTAL (100)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-800/60">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-12 text-slate-400">
+                  <td colSpan="7" className="text-center py-12 text-slate-400 font-mono">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
-                    Loading Student Roster...
+                    SYNCHRONIZING CANDIDATE ROSTER...
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-12 text-slate-400">
-                    No students found matching your criteria.
+                  <td colSpan="7" className="text-center py-12 text-slate-500 font-mono">
+                    // NO CANDIDATE NODES FOUND MATCHING QUERY.
                   </td>
                 </tr>
               ) : (
@@ -454,24 +459,24 @@ export const MarksEntry = () => {
                   return (
                     <tr
                       key={std.rollNumber}
-                      className={`hover:bg-slate-800/40 transition ${
+                      className={`hover:bg-slate-900/40 transition ${
                         isAbsent ? 'bg-rose-950/20' : ''
                       }`}
                     >
-                      <td className="px-5 py-2.5 font-mono text-xs text-slate-500">{idx + 1}</td>
-                      <td className="px-5 py-2.5 font-mono font-bold text-cyan-400">{std.rollNumber}</td>
-                      <td className="px-5 py-2.5 font-medium text-white">{std.name}</td>
+                      <td className="px-4 py-2 font-mono text-[11px] text-slate-500">{idx + 1}</td>
+                      <td className="px-4 py-2 font-mono font-bold text-cyan-400">{std.rollNumber}</td>
+                      <td className="px-4 py-2 font-medium text-white">{std.name}</td>
 
                       {/* Absent Toggle Button */}
-                      <td className="px-5 py-2.5 text-center">
+                      <td className="px-4 py-2 text-center">
                         <button
                           type="button"
                           disabled={currentExam?.isMarksEntryLocked}
                           onClick={() => handleToggleAbsent(std.rollNumber)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
                             isAbsent
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.25)]'
+                              : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
                           }`}
                         >
                           {isAbsent ? 'ABSENT' : 'PRESENT'}
@@ -479,7 +484,7 @@ export const MarksEntry = () => {
                       </td>
 
                       {/* Internal Marks Input */}
-                      <td className="px-5 py-2.5">
+                      <td className="px-4 py-2">
                         <input
                           type="number"
                           disabled={isAbsent || currentExam?.isMarksEntryLocked}
@@ -488,16 +493,16 @@ export const MarksEntry = () => {
                           value={m.internalMarks}
                           onChange={(e) => handleCellChange(std.rollNumber, 'internalMarks', e.target.value)}
                           placeholder="0"
-                          className={`w-28 px-3 py-1.5 bg-slate-950 rounded-xl text-white font-mono text-sm border focus:outline-none transition ${
+                          className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
                             isInternalInvalid
                               ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
-                              : 'border-slate-700 focus:border-cyan-500'
+                              : 'border-cyan-500/30 focus:border-cyan-400'
                           } disabled:opacity-40 disabled:cursor-not-allowed`}
                         />
                       </td>
 
                       {/* External Marks Input */}
-                      <td className="px-5 py-2.5">
+                      <td className="px-4 py-2">
                         <input
                           type="number"
                           disabled={isAbsent || currentExam?.isMarksEntryLocked}
@@ -506,18 +511,18 @@ export const MarksEntry = () => {
                           value={m.externalMarks}
                           onChange={(e) => handleCellChange(std.rollNumber, 'externalMarks', e.target.value)}
                           placeholder="0"
-                          className={`w-28 px-3 py-1.5 bg-slate-950 rounded-xl text-white font-mono text-sm border focus:outline-none transition ${
+                          className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
                             isExternalInvalid
                               ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
-                              : 'border-slate-700 focus:border-cyan-500'
+                              : 'border-cyan-500/30 focus:border-cyan-400'
                           } disabled:opacity-40 disabled:cursor-not-allowed`}
                         />
                       </td>
 
                       {/* Total Display */}
-                      <td className="px-5 py-2.5 font-mono font-bold text-base text-cyan-400">
+                      <td className="px-4 py-2 font-mono font-extrabold text-sm text-cyan-300">
                         {isAbsent ? (
-                          <span className="text-rose-400 text-xs font-semibold">AB</span>
+                          <span className="text-rose-400 text-xs font-bold">[ AB ]</span>
                         ) : (
                           total
                         )}
@@ -538,65 +543,65 @@ export const MarksEntry = () => {
           setIsCsvModalOpen(false);
           setValidationReport(null);
         }}
-        title="Batch Marks Upload & Validation Engine"
+        title="BATCH MARKS TELEMETRY INGESTION"
         subtitle="Upload or paste CSV student marks for automated rule-checking and error discovery"
         maxWidth="max-w-3xl"
       >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 bg-slate-800/40 p-3 rounded-xl border border-slate-800">
+        <div className="space-y-4 font-mono">
+          <div className="flex items-center justify-between text-xs text-slate-400 bg-slate-900/60 p-3 rounded-lg border border-cyan-500/20">
             <span>
-              Expected format: <strong className="text-white font-mono">Roll Number, Internal Marks, External Marks, isAbsent</strong>
+              FORMAT: <strong className="text-cyan-300">Roll Number, Internal Marks, External Marks, isAbsent</strong>
             </span>
             <Button size="sm" variant="ghost" icon={FileDown} onClick={handleDownloadSampleCsv}>
-              Download Template
+              TEMPLATE
             </Button>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
-              Paste CSV Content or Upload File
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+              PASTE CSV CONTENT OR RAW STREAM
             </label>
             <textarea
-              rows={7}
+              rows={6}
               placeholder={`Roll Number, Internal Marks, External Marks, isAbsent\n24CS001, 26, 62, false\n24CS002, 28, 65, false`}
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
-              className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:border-cyan-500 focus:outline-none"
+              className="w-full p-3 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white font-mono focus:border-cyan-400 focus:outline-none"
             />
           </div>
 
           {/* Validation Report Banner */}
           {validationReport && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`p-4 rounded-xl border ${
+              className={`p-3.5 rounded-lg border ${
                 validationReport.errorCount > 0
-                  ? 'bg-amber-950/30 border-amber-500/40 text-amber-200'
-                  : 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+                  ? 'bg-amber-950/40 border-amber-500/50 text-amber-200'
+                  : 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-sm flex items-center gap-2">
+                <span className="font-bold text-xs flex items-center gap-2">
                   {validationReport.errorCount > 0 ? (
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
                   ) : (
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   )}
-                  Validation Summary: {validationReport.validCount} Valid Records, {validationReport.errorCount} Errors
+                  SCAN COMPLETE: {validationReport.validCount} Valid, {validationReport.errorCount} Errors
                 </span>
 
                 {validationReport.errorCount > 0 && (
                   <Button size="sm" variant="danger" icon={Download} onClick={handleDownloadErrorReport}>
-                    Download Error Report
+                    ERROR REPORT
                   </Button>
                 )}
               </div>
 
               {validationReport.errors?.length > 0 && (
-                <div className="mt-3 max-h-40 overflow-y-auto space-y-1.5 text-xs font-mono bg-slate-950/70 p-2.5 rounded-lg border border-slate-800">
+                <div className="mt-2 max-h-36 overflow-y-auto space-y-1 text-[11px] font-mono bg-[#080C14]/90 p-2 rounded border border-slate-800">
                   {validationReport.errors.map((err, i) => (
-                    <div key={i} className="text-rose-400 flex items-start gap-2">
+                    <div key={i} className="text-rose-400 flex items-start gap-1.5">
                       <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                       <span>
                         Row {err.row} ({err.rollNumber}): {err.error}
@@ -608,26 +613,26 @@ export const MarksEntry = () => {
             </motion.div>
           )}
 
-          <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+          <div className="flex justify-between items-center pt-3 border-t border-cyan-500/20">
             <Button
               variant="outline"
               onClick={() => handleValidateCsv(false)}
               loading={uploading}
             >
-              Verify & Check Errors
+              VERIFY DATASET
             </Button>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setIsCsvModalOpen(false)}>
-                Cancel
+                CANCEL
               </Button>
               <Button
-                variant="gradient"
+                variant="primary"
                 onClick={() => handleValidateCsv(true)}
                 loading={uploading}
                 disabled={currentExam?.isMarksEntryLocked}
               >
-                Commit Valid Records
+                COMMIT RECORDS
               </Button>
             </div>
           </div>
