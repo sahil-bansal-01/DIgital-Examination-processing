@@ -1,199 +1,189 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, ShieldCheck, Database, CheckCircle2, Crosshair, Sparkles } from 'lucide-react';
-import { isReducedMotion } from '../../animations/variants';
+import { CappCircuitLogo } from '../capp/CappCircuitLogo';
 
-const STATUS_STAGES = [
-  { max: 25, text: 'BOOTING CAPP CORE...', icon: Cpu },
-  { max: 50, text: 'INGESTING PARALLEL MATRICES...', icon: Sparkles },
-  { max: 70, text: 'VERIFYING ENCRYPTION & ROLES...', icon: ShieldCheck },
-  { max: 90, text: 'SYNCHRONIZING THREAD POOL...', icon: Database },
-  { max: 100, text: 'COMMAND CENTER ONLINE', icon: CheckCircle2 },
+const LOG_MESSAGES = [
+  '[INITIALIZING HARDWARE CORES]',
+  '[CHECKING WORKERS]',
+  '[SPAWNING 24 PARALLEL THREADS]',
+  '[COMPUTE ACTIVE]',
+  '[AES-256 ENCRYPTION READY]',
+  '[MAPPING EVALUATION BUS]',
+  '[VALIDATING MEMORY REGISTERS]',
+  '[ALL SYSTEMS NOMINAL - 100%]',
 ];
 
 export const Preloader = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [dbChecked, setDbChecked] = useState(false);
-  const dbCheckStartedRef = useRef(false);
+  const [logIndex, setLogIndex] = useState(0);
+
+  // Allow re-triggering preloader anytime for demo / presentation
+  useEffect(() => {
+    const handleReplay = () => {
+      setProgress(0);
+      setIsVisible(true);
+      setLogIndex(0);
+    };
+    window.addEventListener('capp-replay-preloader', handleReplay);
+    return () => window.removeEventListener('capp-replay-preloader', handleReplay);
+  }, []);
 
   useEffect(() => {
-    const seen = sessionStorage.getItem('capp_preloader_seen');
-    if (seen) {
-      setIsVisible(false);
-      onFinish?.();
-      return;
-    }
+    if (!isVisible && progress >= 100) return;
 
-    const reduced = isReducedMotion();
-    const totalDuration = reduced ? 1000 : 2600;
-    const intervalMs = 24;
-    const baseIncrement = (100 / (totalDuration / intervalMs));
+    // Fast-updating status logs interval
+    const logTimer = setInterval(() => {
+      setLogIndex((prev) => (prev + 1) % LOG_MESSAGES.length);
+    }, 280);
 
-    const timer = setInterval(() => {
+    // Progress counter (smooth 0% to 100%)
+    const durationMs = 2400; // ~2.4 seconds total smooth load
+    const intervalMs = 20;
+    const increment = 100 / (durationMs / intervalMs);
+
+    const progressTimer = setInterval(() => {
       setProgress((prev) => {
-        let delta = baseIncrement;
-        if (prev < 30) delta *= 1.3;
-        else if (prev >= 30 && prev < 75) delta *= 0.9;
-        else if (prev >= 75) delta *= 1.25;
+        let delta = increment;
+        // Non-linear realistic feel (faster at start, steady mid, quick snap at 100)
+        if (prev < 30) delta *= 1.4;
+        else if (prev >= 30 && prev < 75) delta *= 0.85;
+        else if (prev >= 75) delta *= 1.3;
 
         const next = Math.min(100, prev + delta);
 
         if (next >= 100) {
-          clearInterval(timer);
+          clearInterval(progressTimer);
+          clearInterval(logTimer);
+          setLogIndex(LOG_MESSAGES.length - 1);
+
           setTimeout(() => {
-            sessionStorage.setItem('capp_preloader_seen', 'true');
             setIsVisible(false);
             setTimeout(() => {
               onFinish?.();
-            }, 400);
-          }, 350);
+            }, 500);
+          }, 450);
+
           return 100;
         }
         return next;
       });
     }, intervalMs);
 
-    return () => clearInterval(timer);
-  }, [onFinish]);
-
-  const currentStage = STATUS_STAGES.find((s) => progress <= s.max) || STATUS_STAGES[STATUS_STAGES.length - 1];
-  const StageIcon = currentStage.icon;
-
-  const radius = 64;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
+    return () => {
+      clearInterval(progressTimer);
+      clearInterval(logTimer);
+    };
+  }, [isVisible, onFinish]);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          key="capp-preloader"
+          key="capp-preloader-overlay"
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.04,
-            filter: 'blur(8px)',
-            transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+            scale: 1.03,
+            filter: 'blur(10px)',
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
           }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#030508] overflow-hidden select-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040810] overflow-hidden select-none font-mono"
           role="progressbar"
           aria-valuenow={Math.round(progress)}
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          {/* Cyber Radial Grid */}
+          {/* Subtle Cyber Grid Background Overlay */}
           <div
-            className="absolute inset-0 opacity-20 pointer-events-none"
+            className="absolute inset-0 pointer-events-none opacity-25"
             style={{
-              backgroundImage: 'radial-gradient(circle, #00F2FE 1px, transparent 1px)',
-              backgroundSize: '32px 32px',
-              maskImage: 'radial-gradient(circle at center, black 40%, transparent 80%)',
-              WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 80%)',
+              backgroundImage: `
+                radial-gradient(circle at center, rgba(0, 242, 255, 0.12) 0%, transparent 65%),
+                linear-gradient(to right, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 242, 255, 0.05) 1px, transparent 1px)
+              `,
+              backgroundSize: '100% 100%, 36px 36px, 36px 36px',
             }}
           />
 
-          {/* Central Pulsing Cyan / Purple Halo */}
+          {/* Central Deep Glow Aura (Cyan & Purple) */}
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none opacity-30 animate-pulse"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none opacity-30 animate-pulse"
             style={{
-              background: 'radial-gradient(circle, #00F2FE 0%, #8B5CF6 45%, transparent 70%)',
+              background: 'radial-gradient(circle, #00F2FF 0%, #A855F7 45%, transparent 70%)',
             }}
           />
 
-          {/* Central Logo & Circular Progress */}
-          <div className="relative z-10 flex flex-col items-center max-w-sm w-full px-6">
+          {/* Precision Corner HUD Guides */}
+          <div className="absolute top-6 left-6 text-[10px] text-cyan-400/40 tracking-widest uppercase">
+            // SYS.BOOT // SECURE ARCHITECTURE
+          </div>
+          <div className="absolute top-6 right-6 text-[10px] text-cyan-400/40 tracking-widest uppercase">
+            AES-256 // ENCRYPTED
+          </div>
+          <div className="absolute bottom-6 left-6 text-[10px] text-cyan-400/40 tracking-widest uppercase">
+            PARALLEL CORE // THREADS: 24
+          </div>
+          <div className="absolute bottom-6 right-6 text-[10px] text-cyan-400/40 tracking-widest uppercase">
+            DIAGNOSTIC: OK-2026
+          </div>
+
+          {/* Center Stage: Glowing Hexagonal Circuit-Chip Core */}
+          <div className="relative z-10 flex flex-col items-center max-w-md w-full px-6">
             <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
+              initial={{ scale: 0.88, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="relative flex items-center justify-center mb-8"
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="relative mb-6"
             >
-              {/* SVG Ring Background & Stroke */}
-              <svg className="w-36 h-36 transform -rotate-90" viewBox="0 0 160 160">
-                <circle
-                  cx="80"
-                  cy="80"
-                  r={radius}
-                  stroke="rgba(0, 242, 254, 0.15)"
-                  strokeWidth="3"
-                  fill="transparent"
-                />
-                <circle
-                  cx="80"
-                  cy="80"
-                  r={radius}
-                  stroke="url(#cyanGlowGrad)"
-                  strokeWidth="4"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                  fill="transparent"
-                  style={{
-                    transition: 'stroke-dashoffset 0.08s linear',
-                    filter: 'drop-shadow(0 0 8px rgba(0, 242, 254, 0.8))',
-                  }}
-                />
-                <defs>
-                  <linearGradient id="cyanGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00F2FE" />
-                    <stop offset="60%" stopColor="#00D2FF" />
-                    <stop offset="100%" stopColor="#8B5CF6" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Central Crosshair / Core Icon */}
-              <div className="absolute w-20 h-20 rounded-xl bg-[#080C14] border border-cyan-500/40 flex items-center justify-center shadow-[0_0_25px_rgba(0,242,254,0.3)] tech-corners">
-                <Crosshair className="w-10 h-10 text-cyan-400 animate-spin" style={{ animationDuration: '24s' }} />
-              </div>
+              {/* Circuit Logo Vector */}
+              <CappCircuitLogo size={240} glow={true} animate={true} showLabel={false} />
             </motion.div>
 
             {/* Wordmark */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
-              className="text-center mb-6 font-mono"
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="text-center mb-5"
             >
-              <h1 className="text-2xl font-extrabold tracking-wider text-white">
-                CAPP <span className="text-cyan-400">ENGINE</span>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-white uppercase">
+                CAPP <span className="text-[#00F2FF] text-glow-cyan">ENGINE</span>
               </h1>
-              <p className="text-[10px] tracking-widest text-cyan-400/80 uppercase mt-1">
-                // PARALLEL EXAMINATION CORE
+              <p className="text-[11px] tracking-[0.22em] text-[#00F2FF] font-semibold uppercase mt-1">
+                // INITIALIZING CAPP EXAMINATION CORE...
               </p>
             </motion.div>
 
-            {/* Linear Progress */}
-            <div className="w-full space-y-2.5 font-mono">
-              <div className="flex items-center justify-between text-xs">
-                <div className="h-5 flex items-center">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentStage.text}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex items-center gap-1.5 text-cyan-300 text-[11px]"
-                    >
-                      <StageIcon className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                      <span>{currentStage.text}</span>
-                    </motion.div>
-                  </AnimatePresence>
+            {/* Progress Bar & Fast-Updating Status Logs */}
+            <div className="w-full space-y-3 font-mono">
+              {/* Status Header: Fast-Updating Status Log + Percent */}
+              <div className="flex items-center justify-between text-xs px-0.5">
+                <div className="flex items-center gap-2 text-cyan-300">
+                  <span className="w-2 h-2 rounded-full bg-[#00F2FF] animate-ping" />
+                  <span className="text-[11px] tracking-wider text-cyan-200 font-bold min-w-[200px]">
+                    {LOG_MESSAGES[logIndex]}
+                  </span>
                 </div>
-
-                <span className="text-cyan-400 font-bold text-xs tracking-wider">
+                <span className="text-[#00F2FF] font-bold text-sm tracking-wider">
                   {Math.round(progress)}%
                 </span>
               </div>
 
-              {/* Progress Bar */}
-              <div className="w-full h-1 bg-slate-900 border border-cyan-500/30 rounded-full p-0.2 overflow-hidden shadow-[0_0_10px_rgba(0,242,254,0.2)]">
+              {/* Glowing Progress Bar Track & Bar */}
+              <div className="relative w-full h-2 bg-[#080E1A] border border-[#00F2FF]/40 rounded-full p-[2px] overflow-hidden shadow-[0_0_15px_rgba(0,242,255,0.25)]">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-cyan-300 to-purple-500 shadow-[0_0_10px_#00F2FE]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#00F2FF] via-[#38BDF8] to-[#A855F7] shadow-[0_0_12px_#00F2FF]"
                   style={{ width: `${progress}%` }}
                 />
+              </div>
+
+              {/* Sub-log Metrics */}
+              <div className="flex items-center justify-between text-[9px] text-slate-400 pt-1 tracking-wider">
+                <span>PARALLEL CHUNKER: ONLINE</span>
+                <span className="text-[#00F2FF]">AES-256 GCM</span>
+                <span>MEM: 512MB POOL</span>
               </div>
             </div>
           </div>
