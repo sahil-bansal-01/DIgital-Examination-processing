@@ -121,16 +121,6 @@ export const Navbar = ({ setIsMobileOpen }) => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Performance Lab Quick Trigger */}
-        {(isAdmin || isTeacher) && (
-          <Link
-            to="/performance-lab"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 transition text-xs font-mono font-semibold shadow-sm"
-          >
-            <Zap className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden lg:inline">CAPP LAB</span>
-          </Link>
-        )}
 
         {/* Live System Clock (Monospace UTC/IST toggle) */}
         <button

@@ -16,12 +16,14 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 
 export const ExamManagement = () => {
+  const { isAdmin } = useAuth();
   const toast = useToast();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,9 +129,11 @@ export const ExamManagement = () => {
           </p>
         </div>
 
-        <Button variant="primary" icon={Plus} onClick={() => setIsCreateModalOpen(true)}>
-          NEW PROTOCOL
-        </Button>
+        {isAdmin && (
+          <Button variant="primary" icon={Plus} onClick={() => setIsCreateModalOpen(true)}>
+            NEW PROTOCOL
+          </Button>
+        )}
       </div>
 
       {/* Exams Grid */}
@@ -151,18 +155,28 @@ export const ExamManagement = () => {
                   </span>
                 </div>
 
-                <button
-                  onClick={() => handleToggleLock(exam._id)}
-                  title={exam.isMarksEntryLocked ? 'Marks Entry is Locked' : 'Marks Entry is Open'}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition border ${
+                {isAdmin ? (
+                  <button
+                    onClick={() => handleToggleLock(exam._id)}
+                    title={exam.isMarksEntryLocked ? 'Marks Entry is Locked' : 'Marks Entry is Open'}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition border ${
+                      exam.isMarksEntryLocked
+                        ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
+                        : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+                    }`}
+                  >
+                    {exam.isMarksEntryLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                    <span>{exam.isMarksEntryLocked ? 'LOCKED' : 'UNLOCKED'}</span>
+                  </button>
+                ) : (
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                     exam.isMarksEntryLocked
-                      ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
-                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-                  }`}
-                >
-                  {exam.isMarksEntryLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                  <span>{exam.isMarksEntryLocked ? 'LOCKED' : 'UNLOCKED'}</span>
-                </button>
+                      ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
+                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                  }`}>
+                    {exam.isMarksEntryLocked ? 'LOCKED' : 'OPEN FOR ENTRY'}
+                  </span>
+                )}
               </div>
 
               {/* Title & Metadata */}
@@ -194,16 +208,22 @@ export const ExamManagement = () => {
               {/* Status Selector */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-slate-400 uppercase">STAGE:</span>
-                <select
-                  value={exam.status}
-                  onChange={(e) => handleStatusChange(exam._id, e.target.value)}
-                  className="px-2.5 py-1 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
-                >
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Marks Entry">Marks Entry</option>
-                  <option value="Processing">Processing</option>
-                  <option value="Published">Published</option>
-                </select>
+                {isAdmin ? (
+                  <select
+                    value={exam.status}
+                    onChange={(e) => handleStatusChange(exam._id, e.target.value)}
+                    className="px-2.5 py-1 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400 transition"
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Marks Entry">Marks Entry</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Published">Published</option>
+                  </select>
+                ) : (
+                  <Badge variant={getStatusBadgeVariant(exam.status)}>
+                    {exam.status.toUpperCase()}
+                  </Badge>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -214,11 +234,13 @@ export const ExamManagement = () => {
                   </Button>
                 </Link>
 
-                <Link to={`/processing?examId=${exam._id}`}>
-                  <Button size="sm" variant="primary" icon={Cpu}>
-                    PROCESS
-                  </Button>
-                </Link>
+                {isAdmin && (
+                  <Link to={`/processing?examId=${exam._id}`}>
+                    <Button size="sm" variant="primary" icon={Cpu}>
+                      PROCESS
+                    </Button>
+                  </Link>
+                )}
 
                 {exam.status === 'Published' && (
                   <Link to={`/results?examId=${exam._id}`}>

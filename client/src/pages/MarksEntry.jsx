@@ -16,7 +16,9 @@ import {
   Crosshair,
   Terminal,
   Activity,
-  Layers
+  Layers,
+  UploadCloud,
+  Edit3
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +32,7 @@ export const MarksEntry = () => {
   const { user, isTeacher } = useAuth();
   const toast = useToast();
 
+  const [activeTab, setActiveTab] = useState('grid'); // 'grid' | 'ingestion'
   const [exams, setExams] = useState([]);
   const [selectedExamId, setSelectedExamId] = useState(searchParams.get('examId') || '');
   const [selectedSubjectId, setSelectedSubjectId] = useState(searchParams.get('subjectId') || '');
@@ -297,20 +300,56 @@ export const MarksEntry = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" icon={Upload} onClick={() => setIsCsvModalOpen(true)}>
-            UPLOAD CSV //
-          </Button>
+          {activeTab === 'grid' ? (
+            <>
+              <Button variant="outline" icon={UploadCloud} onClick={() => setActiveTab('ingestion')}>
+                INGEST CSV //
+              </Button>
 
-          <Button
-            variant="primary"
-            icon={Save}
-            loading={saving}
-            disabled={currentExam?.isMarksEntryLocked}
-            onClick={handleSaveGrid}
-          >
-            COMMIT MARKS MATRIX
-          </Button>
+              <Button
+                variant="primary"
+                icon={Save}
+                loading={saving}
+                disabled={currentExam?.isMarksEntryLocked}
+                onClick={handleSaveGrid}
+              >
+                COMMIT MARKS MATRIX
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" icon={FileSpreadsheet} onClick={() => setActiveTab('grid')}>
+              RETURN TO GRID //
+            </Button>
+          )}
         </div>
+      </div>
+
+      {/* Core Handling Sub-Tabs */}
+      <div className="flex items-center gap-2 p-1.5 bg-[#0F172A]/70 border border-cyan-500/30 rounded-xl overflow-x-auto tech-corners select-none">
+        <button
+          onClick={() => setActiveTab('grid')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all select-none ${
+            activeTab === 'grid'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-[0_0_12px_rgba(0,242,254,0.3)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+          }`}
+        >
+          <span className="text-[10px] text-cyan-500">[01]</span>
+          <FileSpreadsheet className="w-3.5 h-3.5" />
+          <span>MARKS ENTRY & AUTOMATED EVALUATION</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('ingestion')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all select-none ${
+            activeTab === 'ingestion'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-[0_0_12px_rgba(0,242,254,0.3)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+          }`}
+        >
+          <span className="text-[10px] text-cyan-500">[02]</span>
+          <UploadCloud className="w-3.5 h-3.5" />
+          <span>ANSWER SHEET INGESTION / UPLOAD</span>
+        </button>
       </div>
 
       {/* Lock Status Banner */}
@@ -396,145 +435,251 @@ export const MarksEntry = () => {
       </div>
 
       {/* Spreadsheet Editable Grid */}
-      <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-xl tech-corners">
-        <div className="p-3.5 border-b border-cyan-500/20 flex flex-wrap items-center justify-between text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white uppercase">
-              {currentSubject?.code || 'Subject'} - {currentSubject?.name || ''}
-            </span>
-            <span className="text-slate-600">|</span>
-            <span>MAX INTERNAL: <strong className="text-cyan-400">{currentSubject?.maxInternalMarks || 30}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span>MAX EXTERNAL: <strong className="text-cyan-400">{currentSubject?.maxExternalMarks || 70}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span>MAX TOTAL: <strong className="text-emerald-400">100</strong></span>
+      {activeTab === 'grid' && (
+        <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-xl tech-corners">
+          <div className="p-3.5 border-b border-cyan-500/20 flex flex-wrap items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white uppercase">
+                {currentSubject?.code || 'Subject'} - {currentSubject?.name || ''}
+              </span>
+              <span className="text-slate-600">|</span>
+              <span>MAX INTERNAL: <strong className="text-cyan-400">{currentSubject?.maxInternalMarks || 30}</strong></span>
+              <span className="text-slate-600">|</span>
+              <span>MAX EXTERNAL: <strong className="text-cyan-400">{currentSubject?.maxExternalMarks || 70}</strong></span>
+              <span className="text-slate-600">|</span>
+              <span>MAX TOTAL: <strong className="text-emerald-400">100</strong></span>
+            </div>
+
+            <div className="text-[11px] text-slate-400">
+              SHOWING {filteredStudents.length} OF {students.length} CANDIDATES
+            </div>
           </div>
 
-          <div className="text-[11px] text-slate-400">
-            SHOWING {filteredStudents.length} OF {students.length} CANDIDATES
+          <div className="overflow-x-auto max-h-[580px]">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md border-b border-cyan-500/20">
+                <tr>
+                  <th className="px-4 py-3 w-14">#</th>
+                  <th className="px-4 py-3 w-36">ROLL NUMBER</th>
+                  <th className="px-4 py-3">CANDIDATE NAME</th>
+                  <th className="px-4 py-3 text-center w-28">STATUS</th>
+                  <th className="px-4 py-3 w-36">INTERNAL ({currentSubject?.maxInternalMarks || 30})</th>
+                  <th className="px-4 py-3 w-36">EXTERNAL ({currentSubject?.maxExternalMarks || 70})</th>
+                  <th className="px-4 py-3 w-28 font-bold text-cyan-400">TOTAL (100)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-slate-400 font-mono">
+                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+                      SYNCHRONIZING CANDIDATE ROSTER...
+                    </td>
+                  </tr>
+                ) : filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-slate-500 font-mono">
+                      // NO CANDIDATE NODES FOUND MATCHING QUERY.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredStudents.map((std, idx) => {
+                    const m = marksData[std.rollNumber] || {};
+                    const isAbsent = !!m.isAbsent;
+                    const maxInternal = currentSubject?.maxInternalMarks || 30;
+                    const maxExternal = currentSubject?.maxExternalMarks || 70;
+
+                    const internalNum = Number(m.internalMarks || 0);
+                    const externalNum = Number(m.externalMarks || 0);
+
+                    const isInternalInvalid = !isAbsent && m.internalMarks !== '' && (internalNum < 0 || internalNum > maxInternal);
+                    const isExternalInvalid = !isAbsent && m.externalMarks !== '' && (externalNum < 0 || externalNum > maxExternal);
+                    const total = isAbsent ? 0 : internalNum + externalNum;
+
+                    return (
+                      <tr
+                        key={std.rollNumber}
+                        className={`hover:bg-slate-900/40 transition ${
+                          isAbsent ? 'bg-rose-950/20' : ''
+                        }`}
+                      >
+                        <td className="px-4 py-2 font-mono text-[11px] text-slate-500">{idx + 1}</td>
+                        <td className="px-4 py-2 font-mono font-bold text-cyan-400">{std.rollNumber}</td>
+                        <td className="px-4 py-2 font-medium text-white">{std.name}</td>
+
+                        {/* Absent Toggle Button */}
+                        <td className="px-4 py-2 text-center">
+                          <button
+                            type="button"
+                            disabled={currentExam?.isMarksEntryLocked}
+                            onClick={() => handleToggleAbsent(std.rollNumber)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                              isAbsent
+                                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.25)]'
+                                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
+                            }`}
+                          >
+                            {isAbsent ? 'ABSENT' : 'PRESENT'}
+                          </button>
+                        </td>
+
+                        {/* Internal Marks Input */}
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            disabled={isAbsent || currentExam?.isMarksEntryLocked}
+                            min="0"
+                            max={maxInternal}
+                            value={m.internalMarks}
+                            onChange={(e) => handleCellChange(std.rollNumber, 'internalMarks', e.target.value)}
+                            placeholder="0"
+                            className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
+                              isInternalInvalid
+                                ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
+                                : 'border-cyan-500/30 focus:border-cyan-400'
+                            } disabled:opacity-40 disabled:cursor-not-allowed`}
+                          />
+                        </td>
+
+                        {/* External Marks Input */}
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            disabled={isAbsent || currentExam?.isMarksEntryLocked}
+                            min="0"
+                            max={maxExternal}
+                            value={m.externalMarks}
+                            onChange={(e) => handleCellChange(std.rollNumber, 'externalMarks', e.target.value)}
+                            placeholder="0"
+                            className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
+                              isExternalInvalid
+                                ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
+                                : 'border-cyan-500/30 focus:border-cyan-400'
+                            } disabled:opacity-40 disabled:cursor-not-allowed`}
+                          />
+                        </td>
+
+                        {/* Total Display */}
+                        <td className="px-4 py-2 font-mono font-extrabold text-sm text-cyan-300">
+                          {isAbsent ? (
+                            <span className="text-rose-400 text-xs font-bold">[ AB ]</span>
+                          ) : (
+                            total
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
+      )}
 
-        <div className="overflow-x-auto max-h-[580px]">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-900/90 text-[10px] text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md border-b border-cyan-500/20">
-              <tr>
-                <th className="px-4 py-3 w-14">#</th>
-                <th className="px-4 py-3 w-36">ROLL NUMBER</th>
-                <th className="px-4 py-3">CANDIDATE NAME</th>
-                <th className="px-4 py-3 text-center w-28">STATUS</th>
-                <th className="px-4 py-3 w-36">INTERNAL ({currentSubject?.maxInternalMarks || 30})</th>
-                <th className="px-4 py-3 w-36">EXTERNAL ({currentSubject?.maxExternalMarks || 70})</th>
-                <th className="px-4 py-3 w-28 font-bold text-cyan-400">TOTAL (100)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-12 text-slate-400 font-mono">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
-                    SYNCHRONIZING CANDIDATE ROSTER...
-                  </td>
-                </tr>
-              ) : filteredStudents.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-12 text-slate-500 font-mono">
-                    // NO CANDIDATE NODES FOUND MATCHING QUERY.
-                  </td>
-                </tr>
-              ) : (
-                filteredStudents.map((std, idx) => {
-                  const m = marksData[std.rollNumber] || {};
-                  const isAbsent = !!m.isAbsent;
-                  const maxInternal = currentSubject?.maxInternalMarks || 30;
-                  const maxExternal = currentSubject?.maxExternalMarks || 70;
+      {/* Answer Sheet Ingestion / Upload View */}
+      {activeTab === 'ingestion' && (
+        <div className="rounded-xl bg-[#0F172A]/70 border border-cyan-500/30 shadow-2xl p-6 backdrop-blur-xl tech-corners space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-cyan-500/20 gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <UploadCloud className="w-4 h-4 text-cyan-400" />
+                <span>BATCH ANSWER SHEET INGESTION CONSOLE</span>
+              </h3>
+              <p className="text-xs text-slate-400 font-sans mt-0.5">
+                Ingest student cohort marks via structured CSV stream with zero-leak schema validation
+              </p>
+            </div>
+            <Button size="sm" variant="ghost" icon={FileDown} onClick={handleDownloadSampleCsv}>
+              CSV TEMPLATE
+            </Button>
+          </div>
 
-                  const internalNum = Number(m.internalMarks || 0);
-                  const externalNum = Number(m.externalMarks || 0);
+          <div className="p-3 rounded-lg bg-slate-900/60 border border-cyan-500/20 text-xs text-slate-300">
+            REQUIRED HEADERS: <code className="text-cyan-300 font-bold">Roll Number, Internal Marks, External Marks, isAbsent</code>
+          </div>
 
-                  const isInternalInvalid = !isAbsent && m.internalMarks !== '' && (internalNum < 0 || internalNum > maxInternal);
-                  const isExternalInvalid = !isAbsent && m.externalMarks !== '' && (externalNum < 0 || externalNum > maxExternal);
-                  const total = isAbsent ? 0 : internalNum + externalNum;
+          <div>
+            <label className="block text-[10px] text-slate-300 uppercase tracking-widest mb-1">
+              PASTE CSV CONTENT OR STREAM
+            </label>
+            <textarea
+              rows={8}
+              placeholder={`Roll Number, Internal Marks, External Marks, isAbsent\n24CS001, 26, 62, false\n24CS002, 28, 65, false`}
+              value={csvText}
+              onChange={(e) => setCsvText(e.target.value)}
+              className="w-full p-3 bg-[#080C14] border border-cyan-500/30 rounded-lg text-xs text-white font-mono focus:border-cyan-400 focus:outline-none"
+            />
+          </div>
 
-                  return (
-                    <tr
-                      key={std.rollNumber}
-                      className={`hover:bg-slate-900/40 transition ${
-                        isAbsent ? 'bg-rose-950/20' : ''
-                      }`}
-                    >
-                      <td className="px-4 py-2 font-mono text-[11px] text-slate-500">{idx + 1}</td>
-                      <td className="px-4 py-2 font-mono font-bold text-cyan-400">{std.rollNumber}</td>
-                      <td className="px-4 py-2 font-medium text-white">{std.name}</td>
+          {/* Validation Report Banner */}
+          {validationReport && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-3.5 rounded-lg border ${
+                validationReport.errorCount > 0
+                  ? 'bg-amber-950/40 border-amber-500/50 text-amber-200'
+                  : 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-xs flex items-center gap-2">
+                  {validationReport.errorCount > 0 ? (
+                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  )}
+                  SCAN COMPLETE: {validationReport.validCount} Valid, {validationReport.errorCount} Errors
+                </span>
 
-                      {/* Absent Toggle Button */}
-                      <td className="px-4 py-2 text-center">
-                        <button
-                          type="button"
-                          disabled={currentExam?.isMarksEntryLocked}
-                          onClick={() => handleToggleAbsent(std.rollNumber)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
-                            isAbsent
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.25)]'
-                              : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
-                          }`}
-                        >
-                          {isAbsent ? 'ABSENT' : 'PRESENT'}
-                        </button>
-                      </td>
+                {validationReport.errorCount > 0 && (
+                  <Button size="sm" variant="danger" icon={Download} onClick={handleDownloadErrorReport}>
+                    ERROR REPORT
+                  </Button>
+                )}
+              </div>
 
-                      {/* Internal Marks Input */}
-                      <td className="px-4 py-2">
-                        <input
-                          type="number"
-                          disabled={isAbsent || currentExam?.isMarksEntryLocked}
-                          min="0"
-                          max={maxInternal}
-                          value={m.internalMarks}
-                          onChange={(e) => handleCellChange(std.rollNumber, 'internalMarks', e.target.value)}
-                          placeholder="0"
-                          className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
-                            isInternalInvalid
-                              ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
-                              : 'border-cyan-500/30 focus:border-cyan-400'
-                          } disabled:opacity-40 disabled:cursor-not-allowed`}
-                        />
-                      </td>
-
-                      {/* External Marks Input */}
-                      <td className="px-4 py-2">
-                        <input
-                          type="number"
-                          disabled={isAbsent || currentExam?.isMarksEntryLocked}
-                          min="0"
-                          max={maxExternal}
-                          value={m.externalMarks}
-                          onChange={(e) => handleCellChange(std.rollNumber, 'externalMarks', e.target.value)}
-                          placeholder="0"
-                          className={`w-24 px-2.5 py-1 bg-[#080C14] rounded-lg text-white font-mono text-xs border focus:outline-none transition ${
-                            isExternalInvalid
-                              ? 'border-rose-500 ring-1 ring-rose-500 bg-rose-950/30'
-                              : 'border-cyan-500/30 focus:border-cyan-400'
-                          } disabled:opacity-40 disabled:cursor-not-allowed`}
-                        />
-                      </td>
-
-                      {/* Total Display */}
-                      <td className="px-4 py-2 font-mono font-extrabold text-sm text-cyan-300">
-                        {isAbsent ? (
-                          <span className="text-rose-400 text-xs font-bold">[ AB ]</span>
-                        ) : (
-                          total
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
+              {validationReport.errors?.length > 0 && (
+                <div className="mt-2 max-h-36 overflow-y-auto space-y-1 text-[11px] font-mono bg-[#080C14]/90 p-2 rounded border border-slate-800">
+                  {validationReport.errors.map((err, i) => (
+                    <div key={i} className="text-rose-400 flex items-start gap-1.5">
+                      <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span>
+                        Row {err.row} ({err.rollNumber}): {err.error}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
-            </tbody>
-          </table>
+            </motion.div>
+          )}
+
+          <div className="flex flex-col sm:flex-row justify-between items-center pt-3 border-t border-cyan-500/20 gap-3">
+            <Button
+              variant="outline"
+              onClick={() => handleValidateCsv(false)}
+              loading={uploading}
+            >
+              VERIFY DATASET
+            </Button>
+
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setActiveTab('grid')}>
+                BACK TO GRID
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleValidateCsv(true)}
+                loading={uploading}
+                disabled={currentExam?.isMarksEntryLocked}
+              >
+                COMMIT RECORDS TO DATABASE
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* CSV BATCH UPLOAD MODAL WITH VALIDATION REPORT */}
       <Modal

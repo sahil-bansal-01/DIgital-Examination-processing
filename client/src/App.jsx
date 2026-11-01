@@ -43,6 +43,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+// Route proxy for results based on role
+const ResultsReportsProxy = () => {
+  const { isStudent } = useAuth();
+  return isStudent ? <StudentResults /> : <ResultsReports />;
+};
+
 export const AppContent = () => {
   const [preloaderDone, setPreloaderDone] = useState(false);
 
@@ -74,11 +80,11 @@ export const AppContent = () => {
             }
           />
 
-          {/* Exam Management (Admin) */}
+          {/* Exam Management (Admin & Teacher) */}
           <Route
             path="/exams"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin', 'teacher']}>
                 <ExamManagement />
               </ProtectedRoute>
             }
@@ -114,12 +120,12 @@ export const AppContent = () => {
             }
           />
 
-          {/* Results & Reports (Admin & Teacher) */}
+          {/* Results & Reports (Admin, Teacher & Student) */}
           <Route
             path="/results"
             element={
-              <ProtectedRoute allowedRoles={['admin', 'teacher']}>
-                <ResultsReports />
+              <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+                <ResultsReportsProxy />
               </ProtectedRoute>
             }
           />

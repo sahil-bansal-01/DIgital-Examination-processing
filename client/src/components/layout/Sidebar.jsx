@@ -6,20 +6,12 @@ import {
   GraduationCap,
   CalendarCheck,
   Edit3,
-  Cpu,
-  Zap,
   BarChart3,
-  FileCheck2,
   ScrollText,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Crosshair,
-  Terminal,
-  Shield,
-  Radio,
-  FileText,
-  FlaskConical
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../ui/Badge';
@@ -35,7 +27,7 @@ export const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     navigate('/login');
   };
 
-  // Nav Items Config with Technical Sci-Fi Indexing
+  // Essential Functional Nodes Navigation Index
   const navItems = [
     { 
       to: '/dashboard', 
@@ -59,7 +51,7 @@ export const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       sub: 'PROTOCOLS',
       code: '03', 
       icon: CalendarCheck, 
-      roles: ['admin'] 
+      roles: ['admin', 'teacher'] 
     },
     { 
       to: '/marks', 
@@ -70,63 +62,20 @@ export const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       roles: ['admin', 'teacher'] 
     },
     { 
-      to: '/processing', 
-      label: 'PROCESSING ENGINE', 
-      sub: 'PARALLEL CORE',
-      code: '05', 
-      icon: Cpu, 
-      roles: ['admin'],
-      highlight: true 
-    },
-    { 
-      to: '/performance-lab', 
-      label: 'PERFORMANCE LAB', 
-      sub: 'BENCHMARKS',
-      code: '06', 
-      icon: Zap, 
-      roles: ['admin', 'teacher'], 
-      highlight: true 
-    },
-    { 
       to: '/results', 
       label: 'RESULTS & REPORTS', 
       sub: 'DISPATCH',
-      code: '07', 
+      code: '05', 
       icon: BarChart3, 
-      roles: ['admin', 'teacher'] 
-    },
-    { 
-      to: '/my-results', 
-      label: 'MY TRANSCRIPT', 
-      sub: 'OFFICIAL RECORD',
-      code: '08', 
-      icon: FileCheck2, 
-      roles: ['student'] 
-    },
-    { 
-      to: '/reevaluation', 
-      label: 'RE-EVALUATIONS', 
-      sub: 'PETITIONS',
-      code: '09', 
-      icon: FileText, 
-      roles: ['admin', 'student'] 
+      roles: ['admin', 'teacher', 'student'] 
     },
     { 
       to: '/audit-logs', 
       label: 'AUDIT TRAIL', 
       sub: 'SECURITY LOGS',
-      code: '10', 
+      code: '06', 
       icon: ScrollText, 
       roles: ['admin'] 
-    },
-    { 
-      to: '/capp-lab', 
-      label: 'CAPP LAB', 
-      sub: 'ARCHITECTURE',
-      code: '11', 
-      icon: FlaskConical, 
-      roles: ['admin', 'teacher', 'student'],
-      highlight: true 
     },
   ];
 
@@ -239,11 +188,6 @@ export const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                 {!collapsed && (
                   <div className="flex-1 min-w-0 flex items-center justify-between">
                     <span className="truncate tracking-wide">{item.label}</span>
-                    {item.highlight && (
-                      <span className="text-[9px] px-1 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                        CAPP
-                      </span>
-                    )}
                   </div>
                 )}
               </NavLink>

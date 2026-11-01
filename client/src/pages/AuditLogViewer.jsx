@@ -60,7 +60,7 @@ export const AuditLogViewer = () => {
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
               <Crosshair className="w-3.5 h-3.5" />
-              SECURITY & AUDIT PROTOCOLS // [10]
+              SECURITY & AUDIT PROTOCOLS // [06]
             </span>
             <Badge variant="emerald">TAMPER-EVIDENT LEDGER</Badge>
           </div>
