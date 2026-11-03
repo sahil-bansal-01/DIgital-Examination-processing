@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Crosshair,
+  Cpu,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../ui/Badge';
@@ -76,6 +77,14 @@ export const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       code: '06', 
       icon: ScrollText, 
       roles: ['admin'] 
+    },
+    { 
+      to: '/capp-insights', 
+      label: 'CAPP INSIGHTS', 
+      sub: 'ARCHITECTURE',
+      code: '07', 
+      icon: Cpu, 
+      roles: ['admin', 'teacher', 'student'] 
     },
   ];
 

@@ -4,6 +4,8 @@ import { Subject } from '../models/Academic.js';
 import User from '../models/User.js';
 import { logAudit } from '../middleware/audit.js';
 import { ROLES } from '../config/constants.js';
+import { lruCache } from '../services/lruCache.js';
+import { cacheCoherence } from '../services/cacheCoherence.js';
 
 export const getMarks = async (req, res) => {
   try {
@@ -122,6 +124,15 @@ export const batchSaveMarks = async (req, res) => {
       newValue: auditChanges.slice(0, 10), // sample first 10 for log brevity
       ipAddress: req.ip,
     });
+
+    // CAPP: MESI Cache Coherence (Unit 6) - Invalidate cached copies across evaluators
+    for (const item of updated) {
+      if (item.rollNumber) {
+        cacheCoherence.invalidateRecordAcrossEvaluators(item.rollNumber, req.user?.id || 'core1');
+        lruCache.invalidate(`student:${item.rollNumber}`);
+        lruCache.invalidate(`result:${examId}:${item.rollNumber}`);
+      }
+    }
 
     res.json({
       success: true,
@@ -261,6 +272,15 @@ export const validateAndUploadMarksCSV = async (req, res) => {
         details: `Imported ${savedCount} records via CSV for ${subject.code} (${exam.title}). ${errors.length} validation errors flagged.`,
         newValue: { savedCount, errorCount: errors.length },
       });
+
+      // CAPP: MESI Cache Coherence (Unit 6) - Invalidate cached copies across evaluators
+      for (const rec of validRecords) {
+        if (rec.rollNumber) {
+          cacheCoherence.invalidateRecordAcrossEvaluators(rec.rollNumber, req.user?.id || 'core1');
+          lruCache.invalidate(`student:${rec.rollNumber}`);
+          lruCache.invalidate(`result:${examId}:${rec.rollNumber}`);
+        }
+      }
     }
 
     res.json({

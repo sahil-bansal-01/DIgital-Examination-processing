@@ -19,6 +19,7 @@ import { StudentResults } from './pages/StudentResults';
 import { ReEvaluationAdmin } from './pages/ReEvaluationAdmin';
 import { AuditLogViewer } from './pages/AuditLogViewer';
 import { CappLab } from './pages/capp-lab/CappLab';
+import { CappInsights } from './pages/CappInsights';
 
 // Protected Route Guard with Role check
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -166,6 +167,16 @@ export const AppContent = () => {
             element={
               <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
                 <CappLab />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* CAPP Insights (Admin, Teacher, Student) */}
+          <Route
+            path="/capp-insights"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+                <CappInsights />
               </ProtectedRoute>
             }
           />
